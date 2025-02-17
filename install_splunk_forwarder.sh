@@ -2,22 +2,32 @@
 
 FORWARD_SERVER="10.13.99.2"
 PORT="9997"
+
 USERNAME="kali"
 SERVER_IP="10.13.99.1"
+PASSWORD="kali"
 
-ssh -t ${USERNAME}@${SERVER_IP} << EOF
+sshpass -p "$PASSWORD" ssh -tt ${USERNAME}@${SERVER_IP} << EOF
+    echo "$PASSWORD" | sudo -S wget -O splunkforwarder-9.4.0-6b4ebe426ca6-linux-amd64.tgz "https://do>
 
-wget -O splunkforwarder-9.4.0-6b4ebe426ca6-linux-amd64.tgz "https://download.splunk.com/products/univ>
+    echo "$PASSWORD" | sudo -S tar -zxvf splunkforwarder-9.4.0-6b4ebe426ca6-linux-amd64.tgz -C /tmp
+    echo "$PASSWORD" | sudo -S mv /tmp/splunkforwarder /opt/
 
-tar -zxvf splunkforwarder-9.4.0-6b4ebe426ca6-linux-amd64.tgz
+    id splunk &>/dev/null || echo "$PASSWORD" | sudo -S useradd -m splunk
 
-echo "[+] Moving Splunk files..."
-sudo rsync -av /home/${USERNAME}/splunkforwarder/ /opt/splunkforwarder/
+    echo "$PASSWORD" | sudo -S chown -R splunk:splunk /opt/splunkforwarder
 
-sudo /opt/splunkforwarder/bin/splunk start --accept-license --answer-yes --no-prompt
+    sudo -u splunk mkdir -p /opt/splunk/etc/system/local
 
-sudo /opt/splunkforwarder/bin/splunk add forward-server ${FORWARD_SERVER}:${PORT} -auth admin:SuperSe>
+    # Creates Admin account for Splunk
+    echo "[user_info]" | sudo -u splunk tee /opt/splunk/etc/system/local/user-seed.conf
+    echo "USERNAME = admin" | sudo -u splunk tee -a /opt/splunk/etc/system/local/user-seed.conf
+    echo "PASSWORD = SuperSecure123" | sudo -u splunk tee -a /opt/splunk/etc/system/local/user-seed.c>
 
-sudo /opt/splunkforwarder/bin/splunk restart
 
+    echo "$PASSWORD" | sudo -S chown -R splunk:splunk /opt/splunkforwarder
+
+    echo "$PASSWORD" | sudo -S -u splunk /opt/splunkforwarder/bin/splunk start --accept-license --ans>    echo "$PASSWORD" | sudo -S -u splunk /opt/splunkforwarder/bin/splunk add forward-server ${FORWARD>    echo "$PASSWORD" | sudo -S -u splunk /opt/splunkforwarder/bin/splunk restart
+
+    echo "[+] Splunk Forwarder installation complete!"
 EOF
