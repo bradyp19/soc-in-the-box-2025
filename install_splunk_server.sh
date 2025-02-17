@@ -51,6 +51,10 @@ ssh -t ${SSH_USER}@${VM_IP} << EOF
   echo "USERNAME = admin" | sudo tee -a /opt/splunk/etc/system/local/user-seed.conf
   echo "PASSWORD = SuperSecure123" | sudo tee -a /opt/splunk/etc/system/local/user-seed.conf
 
+  # Enable Listening on port 9997
+  echo "[splunktcp://9997]" | sudo -u splunk tee /opt/splunk/etc/system/local/inputs.conf
+  echo "disabled = 0" | sudo -u splunk tee /opt/splunk/etc/system/local/inputs.conf
+
   # Accept License
   sudo /opt/splunk/bin/splunk start --accept-license --answer-yes --no-prompt
 
@@ -62,4 +66,5 @@ ssh -t ${SSH_USER}@${VM_IP} << EOF
   sudo /opt/splunk/bin/splunk restart
 
   echo "[+] Splunk installation complete!"
+  echo "[+] Change SPLUNK ADMIN password"
 EOF
