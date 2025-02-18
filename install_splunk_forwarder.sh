@@ -20,9 +20,9 @@ sshpass -p "$PASSWORD" ssh -tt ${USERNAME}@${SERVER_IP} << EOF
     sudo -u splunk mkdir -p /opt/splunk/etc/system/local
 
     # Creates Admin account for Splunk
-    echo "[user_info]" | sudo -u splunk tee /opt/splunk/etc/system/local/user-seed.conf
-    echo "USERNAME = admin" | sudo -u splunk tee -a /opt/splunk/etc/system/local/user-seed.conf
-    echo "PASSWORD = SuperSecure123" | sudo -u splunk tee -a /opt/splunk/etc/system/local/user-seed.c>
+    echo "[user_info]" | sudo -u splunk tee /opt/splunkforwarder/etc/system/local/user-seed.conf
+    echo "USERNAME = admin" | sudo -u splunk tee -a /opt/splunkforwarder/etc/system/local/user-seed.conf
+    echo "PASSWORD = SuperSecure123" | sudo -u splunk tee -a /opt/splunkforwarder/etc/system/local/user-seed.c>
 
 
     echo "$PASSWORD" | sudo -S chown -R splunk:splunk /opt/splunkforwarder
