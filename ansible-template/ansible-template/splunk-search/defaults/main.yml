@@ -1,0 +1,8 @@
+---
+splunk_version: "9.4.0"
+splunk_package: "splunk-9.4.0-6b4ebe426ca6-linux-amd64.deb"
+splunk_install_dir: "/opt/splunk"
+splunk_user: "splunk"
+splunk_group: "splunk"
+splunk_admin_password: "password"
+splunk_download_url: "https://download.splunk.com/products/splunk/releases/{{ splunk_version }}/linux/{{ splunk_package }}"

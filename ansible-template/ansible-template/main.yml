@@ -1,0 +1,18 @@
+---
+- name: Configuring Splunk Search Workstation
+  hosts: splunksearch
+  become: true
+  roles:
+    - splunk-search
+
+- name: Install and Configure Splunk Forwarder on Linux
+  hosts: nodes-linux
+  become: true
+  roles:
+    - splunk-forwarder
+
+- name: COnfiguring DFIR machine
+  hosts: nodes-dfir
+  become: true
+  roles:
+    - dfir-station
