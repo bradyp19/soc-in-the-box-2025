@@ -8,7 +8,7 @@ SERVER_IP="10.13.99.1"
 PASSWORD="kali"
 
 sshpass -p "$PASSWORD" ssh -tt ${USERNAME}@${SERVER_IP} << EOF
-    echo "$PASSWORD" | sudo -S wget -O splunkforwarder-9.4.0-6b4ebe426ca6-linux-amd64.tgz "https://do>
+    echo "$PASSWORD" | sudo -S wget -O splunkforwarder-9.4.0-6b4ebe426ca6-linux-amd64.tgz "https://download.splunk.com/products/universalforwarder/releases/9.4.0/linux/splunkforwarder-9.4.0-6b4ebe426ca6-linux-amd64.tgz"
 
     echo "$PASSWORD" | sudo -S tar -zxvf splunkforwarder-9.4.0-6b4ebe426ca6-linux-amd64.tgz -C /tmp
     echo "$PASSWORD" | sudo -S mv /tmp/splunkforwarder /opt/
