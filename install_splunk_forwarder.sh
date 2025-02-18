@@ -27,7 +27,9 @@ sshpass -p "$PASSWORD" ssh -tt ${USERNAME}@${SERVER_IP} << EOF
 
     echo "$PASSWORD" | sudo -S chown -R splunk:splunk /opt/splunkforwarder
 
-    echo "$PASSWORD" | sudo -S -u splunk /opt/splunkforwarder/bin/splunk start --accept-license --ans>    echo "$PASSWORD" | sudo -S -u splunk /opt/splunkforwarder/bin/splunk add forward-server ${FORWARD>    echo "$PASSWORD" | sudo -S -u splunk /opt/splunkforwarder/bin/splunk restart
+    echo "$PASSWORD" | sudo -S -u splunk /opt/splunkforwarder/bin/splunk start --accept-license --answer-yes --no-prompt  
+    echo "$PASSWORD" | sudo -S -u splunk /opt/splunkforwarder/bin/splunk add forward-server ${FORWARD_SERVER}:{PORT} -auth admin:SuperSecure123    
+    echo "$PASSWORD" | sudo -S -u splunk /opt/splunkforwarder/bin/splunk restart
 
     echo "[+] Splunk Forwarder installation complete!"
 EOF
