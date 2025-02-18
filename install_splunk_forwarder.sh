@@ -17,7 +17,7 @@ sshpass -p "$PASSWORD" ssh -tt ${USERNAME}@${SERVER_IP} << EOF
 
     echo "$PASSWORD" | sudo -S chown -R splunk:splunk /opt/splunkforwarder
 
-    sudo -u splunk mkdir -p /opt/splunk/etc/system/local
+    sudo -u splunk mkdir -p /opt/splunkforwarder/etc/system/local
 
     # Creates Admin account for Splunk
     echo "[user_info]" | sudo -u splunk tee /opt/splunkforwarder/etc/system/local/user-seed.conf
