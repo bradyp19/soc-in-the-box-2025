@@ -1,0 +1,11 @@
+---
+splunk_forwarder_version: "9.4.0"
+splunk_forwarder_package: "splunkforwarder-9.4.0-6b4ebe426ca6-linux-amd64.deb"
+splunk_forwarder_install_dir: "/opt/splunkforwarder"
+splunk_forwarder_user: "splunk"
+splunk_forwarder_group: "splunk"
+splunk_search_head: "10.2.3.10"  # IP of the Splunk Search Head
+splunk_forwarder_ports:
+  - 8089  # Management Port
+  - 9997  # Forwarding Port
+  - 514   # Syslog (optional)
