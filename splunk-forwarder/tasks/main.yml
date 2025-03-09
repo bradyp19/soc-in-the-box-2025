@@ -1,16 +1,10 @@
 ---
-- name: Update APT cache
+- name: Ensure APT cache is up-to-date
   ansible.builtin.apt:
     update_cache: true
   when: ansible_os_family == "Debian"
 
-- name: Install CA Certificates (Debian-based systems)
-  ansible.builtin.apt:
-    name: ca-certificates
-    state: present
-  when: ansible_os_family == "Debian"
-
-- name: Install required dependencies
+- name: Install dependencies
   ansible.builtin.package:
     name:
       - wget
@@ -20,22 +14,19 @@
       - python3-passlib
     state: present
 
-- name: Enable UFW (Firewall)
+- name: Enable and configure UFW (Firewall)
   community.general.ufw:
     state: enabled
+    policy: allow
 
-- name: Allow SSH through firewall
-  community.general.ufw:
-    rule: allow
-    port: "22"
-    proto: tcp
-
-- name: Open firewall ports for Splunk Forwarder
+- name: Allow Splunk Forwarder Ports
   community.general.ufw:
     rule: allow
     port: "{{ item }}"
     proto: tcp
-  with_items: "{{ splunk_forwarder_ports }}"
+  with_items:
+    - 8089  # Management Port
+    - 9997  # Forwarding Port
 
 - name: Download Splunk Forwarder
   ansible.builtin.get_url:
@@ -49,69 +40,55 @@
   args:
     creates: "{{ splunk_forwarder_install_dir }}/bin/splunk"
 
-- name: Ensure Splunk Forwarder group exists
-  ansible.builtin.group:
-    name: "{{ splunk_forwarder_group }}"
+- name: Ensure Splunk user exists with home directory
+  ansible.builtin.user:
+    name: "splunk"
+    home: "/home/splunk"
+    shell: "/bin/bash"
+    createhome: yes
     state: present
 
-- name: Ensure Splunk Forwarder user exists
-  ansible.builtin.user:
-    name: "{{ splunk_forwarder_user }}"
-    group: "{{ splunk_forwarder_group }}"
-    system: true
-    shell: /bin/bash
-    createhome: false
-
-- name: Set Splunk user password
-  ansible.builtin.command:
-    cmd: "echo '{{ splunk_forwarder_user }}:splunk' | sudo chpasswd"
-  become: true
-  changed_when: false
+- name: Ensure Splunk home directory exists
+  ansible.builtin.file:
+    path: "/home/splunk"
+    state: directory
+    owner: "splunk"
+    group: "splunk"
+    mode: "0755"
 
 - name: Change ownership of Splunk Forwarder directory
   ansible.builtin.file:
     path: "{{ splunk_forwarder_install_dir }}"
-    owner: "{{ splunk_forwarder_user }}"
-    group: "{{ splunk_forwarder_group }}"
+    owner: "splunk"
+    group: "splunk"
     recurse: true
 
-- name: Configure Splunk Forwarder to send logs to Search Head
+- name: Deploy outputs.conf (Configure Forwarder to send logs to Indexer)
   ansible.builtin.template:
-    src: outputs.conf.j2
+    src: "templates/outputs.conf.j2"
     dest: "{{ splunk_forwarder_install_dir }}/etc/system/local/outputs.conf"
-    owner: "{{ splunk_forwarder_user }}"
-    group: "{{ splunk_forwarder_group }}"
+    owner: "splunk"
+    group: "splunk"
     mode: "0644"
   notify: Restart Splunk Forwarder
 
-# ✅ Stop Splunk Forwarder if running
-- name: Stop Splunk Forwarder if running
-  ansible.builtin.command:
-    cmd: "{{ splunk_forwarder_install_dir }}/bin/splunk stop"
-  become: true
+- name: Deploy inputs.conf (Configure Forwarder to monitor logs)
+  ansible.builtin.template:
+    src: "templates/inputs.conf.j2"
+    dest: "{{ splunk_forwarder_install_dir }}/etc/system/local/inputs.conf"
+    owner: "splunk"
+    group: "splunk"
+    mode: "0644"
+  notify: Restart Splunk Forwarder
+
+- name: Ensure Splunk Forwarder is configured with correct Indexer IP
+  ansible.builtin.shell: |
+    {{ splunk_forwarder_install_dir }}/bin/splunk remove forward-server {{ splunk_search_head }}:9997 || true
+    {{ splunk_forwarder_install_dir }}/bin/splunk add forward-server {{ splunk_search_head }}:9997 -auth {{ splunk_user }}:{{ splunk_password }}
   args:
-    chdir: "{{ splunk_forwarder_install_dir }}"
-  changed_when: false
-  register: splunk_stop_result
-  failed_when: "'not running' not in splunk_stop_result.stderr and splunk_stop_result.rc != 0"
-
-# ✅ Check if the Splunk systemd service file exists
-- name: Check if Splunk Forwarder systemd service exists
-  ansible.builtin.stat:
-    path: "/etc/systemd/system/SplunkForwarder.service"
-  register: splunk_service_file
-
-# ✅ Disable existing Splunk boot-start if systemd file exists
-- name: Disable existing Splunk boot-start if needed
-  ansible.builtin.command:
-    cmd: "{{ splunk_forwarder_install_dir }}/bin/splunk disable boot-start"
+    executable: /bin/bash
   become: true
-  args:
-    chdir: "{{ splunk_forwarder_install_dir }}"
-  changed_when: false
-  when: splunk_service_file.stat.exists # ✅ Use the registered variable
 
-# ✅ Enable Splunk Forwarder boot-start
 - name: Enable Splunk Forwarder boot-start
   ansible.builtin.command:
     cmd: "{{ splunk_forwarder_install_dir }}/bin/splunk enable boot-start --accept-license --answer-yes --no-prompt"
@@ -120,7 +97,6 @@
     chdir: "{{ splunk_forwarder_install_dir }}"
   changed_when: false
 
-# ✅ Start Splunk Forwarder service
 - name: Start Splunk Forwarder service
   ansible.builtin.systemd:
     name: SplunkForwarder
