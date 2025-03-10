@@ -1,0 +1,15 @@
+---
+- name: Deploy OpenVAS
+  hosts: openvas
+  become: yes
+  tasks:
+  # ------------ Install Greenbone Latest Docker Compose Image ------------
+
+    - name: Install Greenbone (Openvas)
+      ansible.builtin.command: curl -f -O -L https://greenbone.github.io/docs/latest/_static/docker-compose.yml
+
+    - name: Download Greenbone Community Container
+      ansible.builtin.command: docker compose -f docker-compose.yml pull
+
+    - name: Start Greenbone Community Containers
+      ansible.builtin.commad: docker compose -f docker-compose.yml up -d
