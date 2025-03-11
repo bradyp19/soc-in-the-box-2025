@@ -20,6 +20,23 @@ ludus:
     cpus: 2
     linux: true
 
+  - vm_name: "{{ range_id }}-ad-win2022-server-x64-1"
+    hostname: "{{ range_id }}-WIN2022-SERVER-1"
+    template: win2022-server-x64-template
+    vlan: 10
+    ip_last_octet: 22
+    ram_gb: 8
+    cpus: 4
+    windows:
+      sysprep: false
+      install_additional_tools: true
+    domain:
+      fqdn: ludus.domain
+      #role: primary-dc
+    testing:
+      snapshot: false
+      block_internet: false    
+
 network:
   inter_vlan_default: ACCEPT
   external_default: ACCEPT
