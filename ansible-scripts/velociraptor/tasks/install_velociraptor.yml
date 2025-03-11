@@ -1,0 +1,72 @@
+---
+- name: Install Velociraptor
+  hosts: dfirstation
+  become: yes
+  vars:
+    ansible_user: debian
+    velociraptor_install_path: /home/{{ ansible_user }}/velociraptor
+    velociraptor_download_link: https://github.com/Velocidex/velociraptor/releases/download/v0.73/velociraptor-v0.73.4-linux-amd64
+    velociraptor_output_file: velociraptor
+  tasks:
+
+  # ----------- System Preparation -----------
+    - name: Install CA Certificates (Debian-based systems)
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install Required Packages
+      ansible.builtin.apt:
+        name:
+          - wget
+        state: present
+
+    - name: Upgrade Debian
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: yes
+
+    - name: Check if a reboot is required.
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+        get_checksum: no
+      register: reboot_required_file
+
+    - name: Reboot the server (if required).
+      ansible.builtin.reboot:
+      when: reboot_required_file.stat.exists == true
+
+    - name: wget velociraptor file
+      ansible.builtin.command: wget {{ velociraptor_download_link }} -O {{ velociraptor_output_file }}
+
+    - name: Create Executable File For Velociraptor
+      ansible.builtin.file:
+        path: "{{ velociraptor_install_path }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: 0777
+  
+    - name: Generate Config File for Velociraptor
+      ansible.builtin.shell:
+        cmd: sudo ./{{ velociraptor_output_file }} config generate > /etc/{{ velociraptor_output_file }}.config.yaml
+
+    - name: Update IP in Velociraptor config file
+      ansible.builtin.lineinfile:
+        path: "/etc/{{ velociraptor_output_file }}.config.yaml"
+        regexp: '^\s*- https://localhost:8000/'
+        line: '  - https://10.13.10.2:8000/'
+        backup: yes
+
+    - name: Enable Front End of Velociraptor
+      ansible.builtin.command:
+        argv:
+          - "sudo"
+          - "./{{ velociraptor_output_file }}"
+          - "--config"
+          - "/etc/{{ velociraptor_output_file }}.config.yaml"
+          - "frontend"
+          - "-v"
+      args:
+        chdir: "/home/{{ ansible_user }}"

@@ -1,0 +1,65 @@
+ludus:
+  - vm_name: "{{ range_id }}-kali"
+    hostname: "{{ range_id }}-kali"
+    template: kali-x64-desktop-template
+    vlan: 99
+    ip_last_octet: 1
+    ram_gb: 8
+    cpus: 4
+    linux: true
+    testing:
+      snapshot: false
+      block_internet: false
+
+  - vm_name: "{{ range_id }}-splunk-search-server"
+    hostname: "{{ range_id }}-splunk-search-server"
+    template: debian-12-x64-server-template
+    vlan: 10
+    ip_last_octet: 1
+    ram_gb: 8
+    cpus: 4
+    linux: true
+    testing:
+      snapshot: false
+      block_internet: false
+
+  - vm_name: "{{ range_id }}-tenable-server"
+    hostname: "{{ range_id }}-tenable-server"
+    template: debian-12-x64-server-template
+    vlan: 10
+    ip_last_octet: 2
+    ram_gb: 8
+    cpus: 4
+    linux: true
+    testing:
+      snapshot: false
+      block_internet: false
+
+  - vm_name: "{{ range_id }}-vulweb-server"
+    hostname: "{{ range_id }}-vulweb-server"
+    template: debian-12-x64-server-template
+    vlan: 11
+    ip_last_octet: 1
+    ram_gb: 4
+    cpus: 2
+    linux: true
+    testing:
+      snapshot: false
+      block_internet: false
+
+network:
+  inter_vlan_default: REJECT
+  rules:
+    - name: Allow kali to all Ubunutu
+      vlan_src: 99
+      vlan_dst: 10
+      protocol: all
+      ports: all
+      action: ACCEPT
+
+    - name: Allow kali to all Ubunutu
+      vlan_src: 10
+      vlan_dst: 99
+      protocol: all
+      ports: all
+      action: ACCEPT
