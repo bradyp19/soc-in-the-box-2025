@@ -59,14 +59,35 @@
         line: '  - https://10.13.10.2:8000/'
         backup: yes
 
-    - name: Enable Front End of Velociraptor
-      ansible.builtin.command:
-        argv:
-          - "sudo"
-          - "./{{ velociraptor_output_file }}"
-          - "--config"
-          - "/etc/{{ velociraptor_output_file }}.config.yaml"
-          - "frontend"
-          - "-v"
-      args:
-        chdir: "/home/{{ ansible_user }}"
+    - name: Update bind_address in Velociraptor Config
+      ansible.builtin.lineinfile:
+        path: "/etc/{{ velociraptor_output_file }}.config.yaml"
+        regexp: 'bind_address:127.0.0.1'
+        line: '  bind_address:10.13.10.2'
+        backup: yes
+
+    - name: Remove Old Bind Address Under GUI
+      ansible.builtin.replace:
+        path: "/etc/{{ velociraptor_output_file }}.config.yaml"
+        regexp: '(^GUI:\n(?:\s{2}.*\n)*)\s*bind_address:\s*127\.0\.0\.1\n'
+        replace: '\1'
+        backup: yes
+
+    - name: Insert bind_address under GUI
+      ansible.builtin.lineinfile:
+        path: "/etc/{{ velociraptor_output_file }}.config.yaml"
+        insertafter: '^GUI:$'
+        line: '  bind_address: 10.13.10.2'
+        backup: yes
+
+#    - name: Enable Front End of Velociraptor
+#      ansible.builtin.command:
+#        argv:
+#          - "sudo"
+#          - "./{{ velociraptor_output_file }}"
+#          - "--config"
+#          - "/etc/{{ velociraptor_output_file }}.config.yaml"
+#          - "frontend"
+#          - "-v"
+#      args:
+#        chdir: "/home/{{ ansible_user }}"
