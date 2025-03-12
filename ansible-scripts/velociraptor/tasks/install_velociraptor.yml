@@ -4,9 +4,12 @@
   become: yes
   vars:
     ansible_user: debian
-    velociraptor_install_path: /home/{{ ansible_user }}/velociraptor
+    velociraptor_install_path: /usr/local/bin/velociraptor
     velociraptor_download_link: https://github.com/Velocidex/velociraptor/releases/download/v0.73/velociraptor-v0.73.4-linux-amd64
     velociraptor_output_file: velociraptor
+    velociraptor_server_ip: 10.3.10.2
+    velociraptor_admin_username: admin
+    velociraptor_admin_password: password
   tasks:
 
   # ----------- System Preparation -----------
@@ -38,32 +41,31 @@
       ansible.builtin.reboot:
       when: reboot_required_file.stat.exists == true
 
+# ----------- Velociraptor -----------
     - name: wget velociraptor file
       ansible.builtin.command: wget {{ velociraptor_download_link }} -O {{ velociraptor_output_file }}
-
+    
+    - name: Move Velociraptor binary to /usr/local/bin
+      command: mv /home/debian/velociraptor /usr/local/bin/velociraptor
+      args:
+        creates: /usr/local/bin/velociraptor
+    
     - name: Create Executable File For Velociraptor
       ansible.builtin.file:
         path: "{{ velociraptor_install_path }}"
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
-        mode: 0777
+        owner: "root"
+        group: "root"
+        mode: 0744
   
     - name: Generate Config File for Velociraptor
       ansible.builtin.shell:
-        cmd: sudo ./{{ velociraptor_output_file }} config generate > /etc/{{ velociraptor_output_file }}.config.yaml
+        cmd: sudo {{ velociraptor_output_file }} config generate > /etc/{{ velociraptor_output_file }}.config.yaml
 
     - name: Update IP in Velociraptor config file
       ansible.builtin.lineinfile:
         path: "/etc/{{ velociraptor_output_file }}.config.yaml"
         regexp: '^\s*- https://localhost:8000/'
-        line: '  - https://10.13.10.2:8000/'
-        backup: yes
-
-    - name: Update bind_address in Velociraptor Config
-      ansible.builtin.lineinfile:
-        path: "/etc/{{ velociraptor_output_file }}.config.yaml"
-        regexp: 'bind_address:127.0.0.1'
-        line: '  bind_address:10.13.10.2'
+        line: '  - https://{{ velociraptor_server_ip }}:8000/'
         backup: yes
 
     - name: Remove Old Bind Address Under GUI
@@ -77,17 +79,52 @@
       ansible.builtin.lineinfile:
         path: "/etc/{{ velociraptor_output_file }}.config.yaml"
         insertafter: '^GUI:$'
-        line: '  bind_address: 10.13.10.2'
+        line: '  bind_address: {{ velociraptor_server_ip }}'
         backup: yes
 
-#    - name: Enable Front End of Velociraptor
-#      ansible.builtin.command:
-#        argv:
-#          - "sudo"
-#          - "./{{ velociraptor_output_file }}"
-#          - "--config"
-#          - "/etc/{{ velociraptor_output_file }}.config.yaml"
-#          - "frontend"
-#          - "-v"
-#      args:
-#        chdir: "/home/{{ ansible_user }}"
+    - name: Create Admin user
+      ansible.builtin.command:
+        argv:
+          - "sudo"
+          - "{{ velociraptor_output_file }}"
+          - "--config"
+          - "/etc/{{ velociraptor_output_file }}.config.yaml"
+          - "user"
+          - "add"
+          - "{{ velociraptor_admin_username }}"
+          - "{{ velociraptor_admin_password }}"
+          - "--role"
+          - "administrator"
+      args:
+        chdir: "/home/{{ ansible_user }}"
+
+    - name: Create Velociraptor systemd service file
+      copy:
+        dest: /etc/systemd/system/velociraptor.service
+        content: |
+          [Unit]
+          Description=Velociraptor linux amd64
+          After=syslog.target network.target
+
+          [Service]
+          Type=simple
+          Restart=always
+          RestartSec=120
+          LimitNOFILE=20000
+          Environment=LANG=en_US.UTF-8
+          ExecStart=/usr/local/bin/velociraptor --config /etc/velociraptor.config.yaml frontend -v
+
+          [Install]
+          WantedBy=multi-user.target
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Reload systemd to recongize new service
+      ansible.builtin.command: systemctl daemon-reload
+
+    - name: Enable and Start Velociraptor Service Starts on Boot
+      systemd:
+        name: velociraptor
+        enabled: yes
+        state: started
