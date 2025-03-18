@@ -2,14 +2,47 @@
 - name: Deploy OpenVAS
   hosts: openvas
   become: yes
+  vars:
+    docker_install_url: "https://greenbone.github.io/docs/latest/_static/docker-compose.yml"
+    docker_compose_file_path: "/home/debian/docker-compose.yml"
   tasks:
   # ------------ Install Greenbone Latest Docker Compose Image ------------
+  # Installing the docker file in the current users home directory
+  # /home/debian/docker-compose.yml
 
-    - name: Install Greenbone (Openvas)
-      ansible.builtin.command: curl -f -O -L https://greenbone.github.io/docs/latest/_static/docker-compose.yml
+    - name: Installing Greenbone (Openvas)
+      ansible.builtin.command: "curl -f -O -L {{ docker_install_url }}"
     
-    - name: Download Greenbone Community Container
+    - name: Downloading Greenbone Community Container
       ansible.builtin.command: docker compose -f docker-compose.yml pull
-    
-    - name: Start Greenbone Community Container
+
+    - name: Change Docker Compose File to Allow Port Forwarding
+      ansible.builtin.lineinfile:
+        path: "{{ docker_compose_file_path }}"
+        regexp: '^\s*- 127.0.0.1:9392:80'
+        line: '        - {{ ansible_default_ipv4.address }}:9392:80'
+        insertafter: '^ports:$'
+        state: present
+        backup: yes
+
+# enable port forwarding when you want to use the http api from your host machine'
+#    - name: Uncomment ports to allow for port forwarding
+#      ansible.builtin.lineinfile:
+#        path: "{{ docker_compose_file_path }}"
+#        regexp: '^\s*# ports:'
+#        line: '    ports:'
+#        insertafter: '^# enable port forwarding when you want to use the http api from your host machine'
+#        state: present
+#        backup: yes
+
+#    - name: Uncomment the port mapping line
+#      ansible.builtin.lineinfile:
+#        path: "{{ docker_compose_file_path }}"
+#        regexp: '^\s*#\s*- 127.0.0.1:3000:80'
+#        line: '        - {{ ansible_default_ipv4.address }}:3000:80'
+#        insertafter: '^ports:$'
+#        state: present
+#        backup: yes
+
+    - name: Starting Greenbone Community Containers
       ansible.builtin.command: docker compose -f docker-compose.yml up -d
