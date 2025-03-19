@@ -1,0 +1,16 @@
+---
+- hosts: dfirstation
+  tasks:
+    - name: Fetch from Velociraptor Server to Master
+      run_once: yes
+      fetch:
+        src: /tmp/client.config.yaml
+        dest: /tmp/
+        flat: yes
+
+- hosts: kali
+  tasks:
+    - name: Copy the File from Master to Client
+      copy:
+        src: /tmp/client.config.yaml
+        dest: /tmp/client.config.yaml
