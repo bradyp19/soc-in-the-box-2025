@@ -1,0 +1,75 @@
+# Install and Start MySQL
+- name: Install MySQL
+  apt:
+    name:
+      - mariadb-server
+    state: present
+    update_cache: yes
+
+- name: Start MySQL service
+  service:
+    name: mysql.service
+    state: restarted
+    enabled: yes
+
+# Set Up MySQL
+- name: Try to collect information with passwordless root access
+  community.mysql.mysql_info:
+    login_user: root
+  register: mysql_root_login
+  ignore_errors: yes
+
+- name: Remove anonymous user accounts
+  community.mysql.mysql_user:
+    name: ''
+    host_all: yes
+    state: absent
+  when: not mysql_root_login.failed == true
+
+- name: Remove MySQL test database
+  community.mysql.mysql_db:
+    name: test
+    state: absent
+  when: not mysql_root_login.failed == true
+
+- name: Change Root User
+  community.mysql.mysql_user:
+    login_user: root
+    login_password: ''
+    name: 'root'
+    password: '{{ mysql_root_password }}'
+    priv: '*.*:ALL,GRANT'
+    host_all: yes
+  when: not mysql_root_login.failed == true
+
+# Set Up Fleet Database
+- name: Create Fleet Database
+  community.mysql.mysql_db:
+    login_user: 'root'
+    login_password: '{{ mysql_root_password }}'
+    name: '{{ mysql_fleet_db_name }}'
+    state: present
+
+- name: Create Fleet Database User
+  mysql_user:
+    name: '{{ mysql_fleet_username }}'
+    password: '{{ mysql_fleet_password }}'
+    priv: '{{ mysql_fleet_db_name }}.*:ALL'
+    state: present
+    login_user: 'root'
+    login_password: '{{ mysql_root_password }}'
+    host: localhost
+
+- name: Copy MySQL Setting Configuration
+  template:
+    src: '~/dfir-station/files/mysql.cnf'
+    dest: '/etc/mysql/conf.d/fleet.cnf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+
+- name: Start MySQL Service
+  service:
+    name: mysql.service
+    state: restarted
+    enabled: yes

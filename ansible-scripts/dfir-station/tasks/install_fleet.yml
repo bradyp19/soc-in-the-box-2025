@@ -1,0 +1,176 @@
+# Prepare System for Fleet Install
+- name: Install CA Certificates
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Install Required Packages
+  ansible.builtin.apt:
+    name:
+      - wget
+    state: present
+
+- name: Upgrade Kali Linux
+  ansible.builtin.apt:
+    upgrade: dist
+    update_cache: yes
+
+- name: Check if Reboot Required
+  ansible.builtin.stat:
+    path: /var/run/reboot-required
+    get_checksum: no
+  register: reboot_required_file
+
+- name: Reboot Server if Required
+  ansible.builtin.reboot:
+  when: reboot_required_file.stat.exists == true
+
+# Install Fleet
+- name: Create Fleet Group
+  group:
+    name: 'fleetdm'
+    state: present
+
+- name: Create Fleet User
+  user:
+    name: fleetdm
+    shell: /usr/sbin/nologin
+
+- name: Download Fleet File Using wget
+  ansible.builtin.command: wget {{ fleet_download_link }} -O {{ fleet_output_file }}
+
+- name: Create Executable File For Fleet
+  ansible.builtin.file:
+    path: "{{ fleet_install_path }}"
+    owner: "root"
+    group: "root"
+    mode: 0755
+    state: touch
+
+- name: Extract Fleet Binary
+  command: tar -xf  {{ fleet_output_file }}
+
+- name: Copy Fleet Binary to /usr/local/bin
+  command: cp {{fleet_output_file }}/fleet /usr/local/bin/
+  args:
+    creates: /usr/local/bin/fleet
+
+# Configure Fleet
+- name: Create Fleet Configuration Directory
+  file:
+    path: /etc/fleet
+    state: directory
+    owner: root
+    group: root
+
+- name: Create directory /etc/fleet if it does not exist
+  file:
+    path: /etc/fleet
+    state: directory
+    mode: 0755
+
+- name: Copy Fleet Configuration
+  template:
+    src: ~/dfir-station/files/fleet.yml
+    dest: /etc/fleet/fleet.yml
+    owner: root
+    group: fleetdm
+    mode: 0640
+
+- name: Create directory /etc/ssl/certs if it does not exist
+  file:
+    path: /etc/ssl/certs
+    state: directory
+    mode: 0755
+
+- name: Copy Fleet Public Cert
+  template:
+    src: '{{ item }}'
+    dest: '/etc/ssl/certs/fleetdm.crt'
+    owner: root
+    group: root
+    mode: 0644
+  with_fileglob:
+    - conf/tls/*.crt
+
+- name: Create directory /etc/ssl/private if it does not exist
+  file:
+    path: /etc/ssl/private
+    state: directory
+    mode: '0755'
+
+- name: Copy Fleet Private Key
+  template:
+    src: '{{ item }}'
+    dest: '/etc/ssl/private/fleetdm.key'
+    owner: root
+    group: root
+    mode: 0400
+  with_fileglob:
+    - conf/tls/*.key
+
+# Initialize Fleet
+- name: Ensure Database Exists
+  community.mysql.mysql_db:
+    login_user: 'root'
+    login_password: '{{ mysql_root_password }}'
+    name: '{{ mysql_fleet_db_name }}'
+    state: present
+  register: fleet_db_status
+
+- name: Intialize Fleet MySQL database
+  shell: /usr/local/bin/fleet prepare db --config /etc/fleet/fleet.yml
+  when: fleet_db_status.failed == false
+
+# Configure Fleet systemd Service
+
+- name: Create fleet systemd service file
+  copy:
+    dest: /etc/systemd/system/fleet.service
+    content: |
+      [Unit]
+      Description=Fleet
+      After=network.target
+
+      [Service]
+      User=fleet
+      Group=fleet
+      LimitNOFILE=8192
+      ExecStart=/usr/local/bin/fleet serve --config /etc/fleet/fleet.yml
+
+      [Install]
+      WantedBy=multi-user.target
+    mode: '0644'
+
+- name: Unmask Fleet Service
+  command: systemctl unmask fleet.service
+
+- name: Ensure fleet binary has correct ownership and permissions
+  ansible.builtin.file:
+    path: /usr/local/bin/fleet
+    owner: fleet
+    group: fleet
+    mode: '0755'
+
+- name: Reload systemd to Recognize New Service
+  ansible.builtin.command: systemctl daemon-reload
+
+- name: Start Fleet Service
+  service:
+    name: fleet.service
+    state: restarted
+    enabled: yes
+
+- name: Check Status of Fleet Service
+  command: systemctl status fleet.service
+
+- name: Follow Fleet Service Logs
+  command: journalctl -u fleet.service -f
+
+- name: Enable and Start Fleet Service on Boot
+  systemd:
+    name: fleet
+    enabled: yes
+    state: started

@@ -8,7 +8,7 @@ wireshark_cli: true
 wireshark_gui_package: wireshark
 wireshark_cli_package: tshark
 
-# Fleet Server
+# Fleet
 ansible_user: kali
 fleet_install_path: /usr/local/bin/fleet
 fleet_download_link: https://github.com/fleetdm/fleet/releases/download/fleet-v4.65.0/fleet_v4.65.0_linux.tar.gz
@@ -16,3 +16,12 @@ fleet_output_file: fleet
 fleet_server_ip: 10.6.99.1
 fleet_admin_username: admin
 fleet_admin_password: password
+hostname: fleet
+fleet_port: 8443
+
+# MySQL
+mysql_root_password: 'password123!'
+mysql_fleet_db_name: 'fleet'
+mysql_fleet_username: 'fleet'
+mysql_fleet_password: 'password123!'
+mysql_fleet_acl: 'localhost'

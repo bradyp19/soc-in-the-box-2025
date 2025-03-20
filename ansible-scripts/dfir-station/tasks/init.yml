@@ -1,0 +1,14 @@
+# Run apt update
+- name: Run the equivalent of "apt-get update" as a separate step
+  apt:
+    update_cache: yes
+
+- name: Update all packages to the latest version
+  apt:
+    upgrade: dist
+
+# Reboot
+- name: Reboot
+  stat:
+    path: '/var/run/reboot-required'
+  register: reboot_status

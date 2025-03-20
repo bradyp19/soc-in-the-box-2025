@@ -1,0 +1,12 @@
+mysql:
+  address: '{{ fleet_server_ip }}':3306
+  database: '{{ mysql_fleet_db_name }}'
+  username: '{{ mysql_fleet_username }}'
+  password: '{{ mysql_fleet_password }}'
+
+redis:
+  address: '{{ fleet_server_ip }}':6379
+
+server:
+  address: '{{ fleet_server_ip }}':8080
+  tls: false
