@@ -5,9 +5,3 @@
     name: SplunkForwarder
     state: restarted
   become: true
-
-# Restart task for Windows
-- name: Restart Splunk Forwarder
-  ansible.windows.win_service:
-    name: SplunkForwarder
-    state: restarted
