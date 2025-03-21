@@ -30,8 +30,10 @@
 
 - name: Download Splunk Forwarder
   ansible.builtin.get_url:
-    url: "https://download.splunk.com/products/universalforwarder/releases/{{ splunk_forwarder_versio>    dest: "/tmp/{{ splunk_forwarder_package }}"
+    url: "https://download.splunk.com/products/universalforwarder/releases/{{ splunk_forwarder_version }}/linux/{{ splunk_forwarder_package }}"    
+    dest: "/tmp/{{ splunk_forwarder_package }}"
     mode: "0644"
+
 - name: Install Splunk Forwarder
   ansible.builtin.command:
     cmd: "dpkg -i /tmp/{{ splunk_forwarder_package }}"
