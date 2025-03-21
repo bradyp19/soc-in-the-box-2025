@@ -1,7 +1,7 @@
 ---
 - name: Install Velociraptor
   hosts: kali
-  become: yes
+  become: true
   vars:
     velociraptor_download_link: https://github.com/Velocidex/velociraptor/releases/download/v0.73/velociraptor-v0.73.4-linux-amd64
   tasks:
