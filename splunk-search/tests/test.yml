@@ -1,0 +1,14 @@
+---
+- hosts: servers
+#  remote_user: root
+  become: true
+  roles:
+    - splunk-search
+
+#- name: Ping Debian Servers and Kali
+#  hosts: all  # Change this if needed (e.g., "debian_servers", "kali")
+#  gather_facts: no
+#
+#  tasks:
+#    - name: Ping the servers
+#      ansible.builtin.ping:

@@ -1,0 +1,7 @@
+---
+# Restart task For kali
+- name: Restart Splunk Forwarder
+  ansible.builtin.systemd:
+    name: SplunkForwarder
+    state: restarted
+  become: true

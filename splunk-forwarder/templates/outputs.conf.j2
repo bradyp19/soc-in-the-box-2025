@@ -1,0 +1,9 @@
+[tcpout]
+defaultGroup = default-autolb-group
+
+[tcpout:default-autolb-group]
+server = {{ splunk_search_head }}:9997
+autoLB = true
+useACK = true
+
+[tcpout-server://{{ splunk_search_head }}:9997]

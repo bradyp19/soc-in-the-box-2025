@@ -1,0 +1,7 @@
+---
+galaxy_info:
+  author: GPSU
+  description: Ansible role to install and configure Splunk
+  license: MIT
+  min_ansible_version: "2.9"
+dependencies: []

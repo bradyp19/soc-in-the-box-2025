@@ -1,0 +1,41 @@
+ludus:
+- vm_name: "{{ range_id }}-DC"
+  hostname: "DC"
+  template: win2022-server-x64-template
+  vlan: 10
+  ip_last_octet: 10
+  force_ip: true
+  ram_gb: 8
+  cpus: 4
+  windows:
+    sysprep: false
+  linux: false
+  macOS: false
+  testing:
+    snapshot: false
+    block_internet: false
+
+- vm_name: "{{ range_id }}-kali"
+  hostname: "{{ range_id }}-kali"
+  template: kali-x64-desktop-template
+  vlan: 99
+  ip_last_octet: 1
+  ram_gb: 8
+  cpus: 4
+  linux: true
+  testing:
+    snapshot: false
+    block_internet: false
+
+- vm_name: "{{ range_id }}-debian-server"
+  hostname: "{{ range_id }}-debian-server"
+  template: debian-12-x64-server-template
+  vlan: 10
+  ip_last_octet: 3
+  ram_gb: 4
+  cpus: 2
+  linux: true
+
+network:
+  inter_vlan_default: ACCEPT
+  external_default: ACCEPT

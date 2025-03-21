@@ -1,0 +1,5 @@
+---
+- hosts: kali
+  become: yes
+  roles:
+    - splunk-forwarder
