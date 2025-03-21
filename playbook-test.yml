@@ -1,7 +1,0 @@
----
-
-- hosts: all
-  become: true
-  tasks:
-    - name: Ping the Ludus Server
-      ansible.builtin.ping:  
