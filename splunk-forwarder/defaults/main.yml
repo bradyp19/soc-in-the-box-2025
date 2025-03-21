@@ -1,13 +1,30 @@
 ---
+# Splunk Forwarder Defaults for Windows
+splunk_forwarder_version: "9.4.1"
+splunk_forwarder_package: "splunkforwarder-9.4.1.msi"
+splunk_forwarder_download_url: "https://download.splunk.com/products/universalforwarder/releases/9.4.>
+splunk_forwarder_install_dir: "C:\\Program Files\\SplunkUniversalForwarder"
+splunk_forwarder_user: "Administrator"  # Windows requires an admin user for installation
+splunk_forwarder_group: "Administrators"
+splunk_user: "admin"
+splunk_password: "password"
+splunk_search_head: "10.36.10.3"  # Change to actual Splunk search head IP
+splunk_forwarder_ports:
+  - 8089  # Management Port
+  - 9997  # Forwarding Port
+  - 514   # Syslog (optional)
+
+# Splunk Forwarder Defaults for Kali
 splunk_forwarder_version: "9.4.0"
 splunk_forwarder_package: "splunkforwarder-9.4.0-6b4ebe426ca6-linux-amd64.deb"
 splunk_forwarder_install_dir: "/opt/splunkforwarder"
 splunk_forwarder_user: "splunk"
 splunk_forwarder_group: "splunk"
 splunk_user: "admin"
-splunk_password: "password" 
-splunk_search_head: "10.36.10.3"  # IP of the Splunk Search Head (change if neeeded)
+splunk_password: "password"
+splunk_search_head: "10.4.10.3"  # IP of the Splunk Search Head (change if neeeded)
 splunk_forwarder_ports:
   - 8089  # Management Port
   - 9997  # Forwarding Port
   - 514   # Syslog (optional)
+
