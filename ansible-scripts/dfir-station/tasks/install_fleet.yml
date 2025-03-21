@@ -30,12 +30,12 @@
 # Install Fleet
 - name: Create Fleet Group
   group:
-    name: 'fleetdm'
+    name: fleet
     state: present
 
 - name: Create Fleet User
   user:
-    name: fleetdm
+    name: fleet
     shell: /usr/sbin/nologin
 
 - name: Download Fleet File Using wget
@@ -76,7 +76,7 @@
     src: ~/dfir-station/files/fleet.yml
     dest: /etc/fleet/fleet.yml
     owner: root
-    group: fleetdm
+    group: fleet
     mode: 0640
 
 - name: Create directory /etc/ssl/certs if it does not exist
@@ -163,11 +163,11 @@
     state: restarted
     enabled: yes
 
-- name: Check Status of Fleet Service
-  command: systemctl status fleet.service
+# - name: Check Status of Fleet Service
+# command: systemctl status fleet.service
 
-- name: Follow Fleet Service Logs
-  command: journalctl -u fleet.service -f
+# - name: Follow Fleet Service Logs
+# command: journalctl -u fleet.service -f
 
 - name: Enable and Start Fleet Service on Boot
   systemd:

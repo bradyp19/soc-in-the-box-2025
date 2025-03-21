@@ -1,9 +1,9 @@
 # Run apt update
-- name: Run the equivalent of "apt-get update" as a separate step
+- name: Run the equivalent of "apt-get update"
   apt:
     update_cache: yes
 
-- name: Update all packages to the latest version
+- name: Update all packages to the most current version
   apt:
     upgrade: dist
 
