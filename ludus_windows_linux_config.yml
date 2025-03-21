@@ -1,16 +1,13 @@
 ludus:
-- vm_name: "{{ range_id }}-DC"
-  hostname: "DC"
-  template: win2022-server-x64-template
+- vm_name: "{{ range_id }}-ad-dc-win2019-server-x64"
+  hostname: "{{ range_id }}-DC01-2019"
+  template: win2019-server-x64-template
   vlan: 10
-  ip_last_octet: 10
-  force_ip: true
+  ip_last_octet: 50
   ram_gb: 8
   cpus: 4
   windows:
     sysprep: false
-  linux: false
-  macOS: false
   testing:
     snapshot: false
     block_internet: false
@@ -35,6 +32,9 @@ ludus:
   ram_gb: 4
   cpus: 2
   linux: true
+  testing:
+    snapshot: false
+    block_internet: false
 
 network:
   inter_vlan_default: ACCEPT
