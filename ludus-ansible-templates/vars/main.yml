@@ -1,0 +1,5 @@
+netbios_name: "DC"  # Retrieved from the "Host Name" field
+fqdn_tail: "home.arpa"  # Retrieved from the "DNS Suffix Search List"
+domain_admin_password: "Str0ngP@ssw0rd!" #Change if needed 
+domain_functional_level: "WinThreshold"  # As per provided requirement
+forest_functional_level: "WinThreshold"  # As per provided requirement
