@@ -99,8 +99,10 @@
 
 - name: Enable Splunk Forwarder boot-start
   ansible.builtin.command:
-    cmd: "{{ splunk_forwarder_install_dir }}/bin/splunk enable boot-start --accept-license --answer-y>  become: true
-  args:                                                                                                   chdir: "{{ splunk_forwarder_install_dir }}"
+    cmd: "{{ splunk_forwarder_install_dir }}/bin/splunk enable boot-start --accept-license --answer-yes --no-prompt"
+  become: true
+  args:
+    chdir: "{{ splunk_forwarder_install_dir }}"
   ignore_errors: yes
   register: boot_start_output
   changed_when: "'systemd unit file already exists' not in boot_start_output.stdout"
