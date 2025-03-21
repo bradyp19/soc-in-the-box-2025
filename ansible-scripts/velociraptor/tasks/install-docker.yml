@@ -1,7 +1,7 @@
 ---
 - name: Install Docker Engine
   hosts: dfirstation
-  become: yes
+  become: true
   vars:
     ansible_user: debian
   tasks:
