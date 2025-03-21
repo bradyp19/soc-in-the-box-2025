@@ -1,0 +1,10 @@
+- name: Provision Windows Server and Create AD Domain
+  hosts: windows
+  vars_files:
+    - vars/domain.yml  # Load domain variables
+  tasks:
+    - name: Enable WinRM (if not already configured)
+      include_tasks: tasks/enable_winrm.yml
+
+    - name: Set up Windows Domain
+      include_tasks: tasks/setup_domain.yml
