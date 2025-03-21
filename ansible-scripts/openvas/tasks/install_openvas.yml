@@ -1,7 +1,7 @@
 ---
 - name: Deploy OpenVAS
   hosts: openvas
-  become: yes
+  become: true
   vars:
     docker_install_url: "https://greenbone.github.io/docs/latest/_static/docker-compose.yml"
     docker_compose_file_path: "/home/debian/docker-compose.yml"
