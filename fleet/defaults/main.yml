@@ -1,0 +1,4 @@
+---
+# Fleet
+ansible_user: debian
+fleet_install_path: /home/{{ ansible_user }}/fleet-docker

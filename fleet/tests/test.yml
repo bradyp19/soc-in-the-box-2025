@@ -1,0 +1,9 @@
+---
+- hosts: forensics_machine_server
+  become: true
+  roles:
+    - dfor-station
+  tasks:
+    - include_vars: '~/dfor-station/defaults/main.yml'
+    - import_tasks: '~/dfor-station/tasks/install_docker.yml'
+    - import_tasks: '~/dfor-station/tasks/main.yml'  # Install Fleet
