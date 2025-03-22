@@ -4,9 +4,9 @@
   roles:
     - dfir-station
   tasks:
-    - include_vars: 'dfir-station/defaults/main.yml'
-    - import_tasks: 'dfir-station/tasks/init.yml' # Init Kali Linux
-    - import_tasks: 'dfir-station/tasks/install_wireshark.yml'  # Install Wireshark 
-    - import_tasks: 'dfir-station/tasks/install_mysql.yml'  # Install MySQL
-    - import_tasks: 'dfir-station/tasks/install_redis.yml'  # Install redis
-    - import_tasks: 'dfir-station/tasks/install_fleet.yml'  # Install FleetDM
+    - include_vars: '~/dfir-station/defaults/main.yml'
+    - import_tasks: '~/dfir-station/tasks/init.yml' # Init Kali Linux
+    - import_tasks: '~/dfir-station/tasks/install_wireshark.yml'  # Install Wireshark 
+    - import_tasks: '~/dfir-station/tasks/install_mysql.yml'  # Install MySQL
+    - import_tasks: '~/dfir-station/tasks/install_redis.yml'  # Install redis
+    - import_tasks: '~/dfir-station/tasks/install_fleet.yml'  # Install FleetDM
