@@ -59,11 +59,15 @@ Run one of the following from your Ansible control node:
 # Test TCP connection to the Windows machine
 nc -zv <windows_ip> 5985
 ```
+Expected output should show:
+```
+(UNKNOWN) [10.7.10.50] 5985 (?) open
+```
 
 Or with PowerShell Core installed:
 
 ```bash
-pwsh -Command "Test-NetConnection -ComputerName <windows_ip> -Port 5985"
+Test-NetConnection -ComputerName 10.7.10.50 -Port 5985
 ```
 
 Expected output should show:
