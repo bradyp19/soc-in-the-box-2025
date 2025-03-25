@@ -10,33 +10,51 @@ try:
 except ImportError:
     psutil = None
 
+# ------------------------------
+# Configuration & Global Variables
+# ------------------------------
+
 REPLAY_MODE = False  
 REPLAY_FILE = "replay_data.txt"  # File containing events to replay in replay mode
 
-# Log file path (for Splunk forwarder, you might set this to e.g., /var/log/socinabox-logs.txt)
-log_file = "/var/log/socinabox-logs.txt"
+# Log file path 
+log_file = "/var/log/log-generator.log"
 
-# Use JSON formatting for Splunk integration (set to False for plain text)
+# Use JSON formatting 
 USE_JSON_FORMAT = True
 
 # Base events per second
 BASE_EPS = 1.0
 
-# Define weighted probabilities for log types (sums to 1.0)
+# Define weighted probabilities for log types (must sum to 1.0)
 event_weights = {
-    "HTTP": 0.4,
-    "SSH": 0.2,
-    "FTP": 0.2,
-    "DNS": 0.1,
-    "SMTP": 0.1
+    "HTTP": 0.45,
+    "SSH": 0.1,
+    "FTP": 0.1,
+    "DNS": 0.2,
+    "SMTP": 0.1,
+    "IDS": 0.05  # New IDS log type for intrusion detection alerts
 }
 
 # Spike configuration: chance to simulate a burst (spike) of events
-SPIKE_FACTOR = 3      # Spike mode increases the EPS by this factor
-SPIKE_PROBABILITY = 0.1  # 10% chance to enter spike mode
+SPIKE_FACTOR = 3         # Spike mode increases the EPS by this factor
+SPIKE_PROBABILITY = 0.1    # 10% chance to enter spike mode
 
 # Anomaly injection probability for SSH logs
 ANOMALY_PROBABILITY = 0.05  # 5% chance to inject an anomaly (multiple failed logins)
+
+# List of hostnames to simulate different devices in the environment
+hosts = ["web01", "db01", "app01", "fw01", "ids01"]
+
+# Mapping of log types to default severity levels
+severity_map = {
+    "HTTP": "Info",
+    "SSH": "Info",
+    "FTP": "Info",
+    "DNS": "Info",
+    "SMTP": "Info",
+    "IDS": "Critical"  # IDS alerts are more severe by nature
+}
 
 # ------------------------------
 # Sample Data for Log Generation
@@ -54,7 +72,7 @@ ips = [f"192.168.1.{i}" for i in range(1, 255)]
 domains = ["example.com", "testsite.net", "myserver.local", "company.org"]
 
 # ------------------------------
-# Log Generation Functions (given by hemanth)
+# Log Generation Functions
 # ------------------------------
 
 def generate_http_log():
@@ -72,6 +90,7 @@ def generate_ssh_log():
     if random.random() < ANOMALY_PROBABILITY:
         action = "Failed password"
         events = []
+        # In anomaly mode, mark severity as Critical
         for _ in range(3):  # generate 3 rapid events
             event_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             events.append(f"[{event_time}] {ip} - {action} for user {username}")
@@ -102,14 +121,37 @@ def generate_smtp_log():
     username = random.choice(usernames)
     return f"[{timestamp}] {ip} - {smtp_action} from {username}@example.com"
 
-# JSON formatting for Splunk
+def generate_ids_log():
+    """
+    Generate an IDS (Intrusion Detection System) alert log.
+    This simulates a high-severity event such as a potential intrusion.
+    """
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    host = random.choice(hosts)
+    # Simulate severity variations
+    severities = ["Low", "Medium", "High", "Critical"]
+    severity = random.choice(severities)
+    alert_message = f"ALERT: Intrusion detected on {host} with severity {severity}"
+    return f"[{timestamp}] {host} - {alert_message}"
+
+# ------------------------------
+# JSON Formatting & Writing Functions
+# ------------------------------
+
 def format_log(log_type, log_message):
+    """
+    Format the log entry in JSON with additional metadata.
+    Additional fields include host and severity, derived from log type.
+    """
+    log_data = {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "log_type": log_type,
+        "host": random.choice(hosts),
+        "severity": severity_map.get(log_type, "Info"),
+        "message": log_message
+    }
     if USE_JSON_FORMAT:
-        return json.dumps({
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "log_type": log_type,
-            "message": log_message
-        })
+        return json.dumps(log_data)
     else:
         return log_message
 
@@ -192,9 +234,12 @@ def generate_logs():
         
         # Simulate a temporary spike with a given probability
         if random.random() < SPIKE_PROBABILITY:
-            effective_delay = 1 / (current_eps * SPIKE_FACTOR)
+            base_delay = 1 / (current_eps * SPIKE_FACTOR)
         else:
-            effective_delay = delay
+            base_delay = delay
+        
+        # Apply a random factor to the delay (simulate real-world variability)
+        effective_delay = random.uniform(0.8 * base_delay, 1.2 * base_delay)
 
         # Select log type using weighted probabilities
         log_type = random.choices(list(event_weights.keys()), weights=list(event_weights.values()), k=1)[0]
@@ -209,6 +254,8 @@ def generate_logs():
             log_entry = generate_dns_log()
         elif log_type == "SMTP":
             log_entry = generate_smtp_log()
+        elif log_type == "IDS":
+            log_entry = generate_ids_log()
         else:
             log_entry = "Unknown log type"
         
@@ -216,6 +263,15 @@ def generate_logs():
         print(formatted_log)
         write_log_to_file(formatted_log)
         time.sleep(effective_delay)
+
+# ------------------------------
+# Future Enhancements:
+# ------------------------------
+# - Load custom event templates from a configuration file.
+# - Simulate correlated events across multiple log sources.
+# - Integrate with alerting mechanisms to simulate real-time incident responses.
+# - Add additional log types (e.g., WAF, DOS) or use real-world sample data.
+# ------------------------------
 
 # ------------------------------
 # Main Execution
