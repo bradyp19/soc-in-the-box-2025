@@ -64,9 +64,11 @@
 
 # same case with npm start-dev command- took over 4 hours and still didn't run- the connection ended up getting reset 
 # as my laptop turned off
-- name: Run the build-static-content script and start the website server with the npm start-dev command
+# - name: Run the build-static-content script and start the website server with the npm start-dev command
+- name: Run the build-static-content script
   ansible.builtin.shell:
-    cmd: npm run start-dev
+    # cmd: npm run start-dev
+    cmd: node ./node_modules/sails/bin/sails run build-static-content
     chdir: fleet-docker/website
 
 - name: Start the website server
