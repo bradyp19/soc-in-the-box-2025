@@ -1,5 +1,5 @@
 ---
-- name: Install Openvas Playbook
+- name: Update Debian Playbook
   ansible.builtin.import_playbook: update_debian.yml
 
 - name: Install Docker Playbook
