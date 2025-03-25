@@ -44,3 +44,32 @@
       - compose
       - up
       - -d
+# Set up Fleet Website Server on Debian
+- name: Update apt package list
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install Node.js and npm
+  ansible.builtin.apt:
+    name:
+      - nodejs
+      - npm
+    state: present
+
+# note: npm install command can take 15+ minutes to run
+- name: Run the npm install command and install npm dependencies
+  ansible.builtin.shell:
+    cmd: npm install
+    chdir: fleet-docker/website
+
+# same case with npm start-dev command- took over 4 hours and still didn't run- the connection ended up getting reset 
+# as my laptop turned off
+- name: Run the build-static-content script and start the website server with the npm start-dev command
+  ansible.builtin.shell:
+    cmd: npm run start-dev
+    chdir: fleet-docker/website
+
+- name: Start the website server
+  ansible.builtin.shell:
+    cmd: node ./node_modules/sails/bin/sails lift
+    chdir: fleet-docker/website
