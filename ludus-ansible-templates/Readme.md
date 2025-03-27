@@ -136,9 +136,9 @@ net user Administrator "YourStrongPassword123"
 
 [windows:vars]
 ansible_user=Administrator 
-ansible_password=YourStrongPassword123 (complex password is mandatory)
+ansible_password=YourStrongPassword123 #complex password is mandatory
 ansible_connection=winrm
-ansible_winrm_transport= ntlm (ntlm required for windows-enterprise)
+ansible_winrm_transport= ntlm #ntlm required for windows-enterprise
 ansible_winrm_server_cert_validation=ignore
 ansible_port=5985
 ```
