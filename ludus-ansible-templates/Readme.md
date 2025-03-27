@@ -100,6 +100,49 @@ Expected output should show:
 TcpTestSucceeded : True
 ```
 
+# Preparing Windows 11 Enterprise for Ansible Playbooks (WinRM Support)
+
+This guide explains how to enable and configure the **Administrator account** on a Windows 11 Enterprise machine to support Ansible playbooks using **WinRM (Windows Remote Management)**.
+
+---
+
+## Why Use the Administrator Account?
+
+To run Ansible playbooks that configure or provision Windows systems via **WinRM**, you must use an account with elevated privileges — typically the built-in `Administrator` account.
+
+By default, this account may be disabled or restricted from remote login. These steps will help you fix that.
+
+---
+
+## Step-by-Step Instructions
+
+### 1. Ensure the Administrator Account is Enabled
+
+Open PowerShell as an administrator and run:
+
+```powershell
+Enable-LocalUser -Name "Administrator"
+```
+###2. Set or Confirm the Administrator Password
+
+```powershell
+net user Administrator "YourStrongPassword123"
+```
+###3. When using Ansible with WinRM, ensure your inventory uses the Administrator account like so:
+
+```inventory.ini
+[windows]
+0.0.0.0
+
+[windows:vars]
+ansible_user=Administrator 
+ansible_password=YourStrongPassword123 (complex password is mandatory)
+ansible_connection=winrm
+ansible_winrm_transport= ntlm (ntlm required for windows-enterprise)
+ansible_winrm_server_cert_validation=ignore
+ansible_port=5985
+```
+
 ---
 
 ## Getting Started with Ansible
@@ -107,6 +150,7 @@ TcpTestSucceeded : True
 Once WinRM is verified and open, you can use the Ansible playbooks in this repository to run the ansible command:
 
 - ansible-playbook -i inventory.ini main.yml
+
 
 ---
 
