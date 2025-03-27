@@ -100,7 +100,7 @@ Expected output should show:
 TcpTestSucceeded : True
 ```
 
-# Preparing Windows 11 Enterprise for Ansible Playbooks (WinRM Support)
+## Preparing Windows 11 Enterprise for Ansible Playbooks (WinRM Support)
 
 This guide explains how to enable and configure the **Administrator account** on a Windows 11 Enterprise machine to support Ansible playbooks using **WinRM (Windows Remote Management)**.
 
