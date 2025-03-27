@@ -17,9 +17,15 @@ except ImportError:
 REPLAY_MODE = False  
 REPLAY_FILE = "replay_data.txt"  # File containing events to replay in replay mode
 
-# Log file path 
-log_file = "/var/log/log-generator.log"
-
+# Determine the OS and set log file path accordingly
+current_os = platform.system()
+if current_os == "Windows":
+    log_file = "C:\\logs\\log-generator.log"
+elif current_os == "Darwin":  # macOS
+    log_file = "/var/log/log-generator.log"
+else:  # Assume Linux or other Unix-like
+    log_file = "/var/log/log-generator.log"
+    
 # Use JSON formatting 
 USE_JSON_FORMAT = True
 
@@ -149,6 +155,8 @@ def format_log(log_type, log_message):
         "host": random.choice(hosts),
         "severity": severity_map.get(log_type, "Info"),
         "message": log_message
+        "os": current_os  # Include the current operating system in the log
+
     }
     if USE_JSON_FORMAT:
         return json.dumps(log_data)
