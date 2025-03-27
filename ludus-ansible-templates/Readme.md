@@ -60,7 +60,7 @@ winrm quickconfig -q
 
 ## Verify WinRM is Working
 
-### On the Windows Machine
+## On the Windows Machine
 
 Run these PowerShell commands to confirm WinRM is listening properly:
 
@@ -76,7 +76,7 @@ You should see entries showing the system is listening on `0.0.0.0:5985` or your
 
 ---
 
-### From the Ludus (Linux/Ansible) Host
+## From the Ludus (Linux/Ansible) Host
 
 Run one of the following from your Ansible control node:
 
@@ -116,19 +116,19 @@ By default, this account may be disabled or restricted from remote login. These 
 
 ## Step-by-Step Instructions
 
-### 1. Ensure the Administrator Account is Enabled
+## 1. Ensure the Administrator Account is Enabled
 
 Open PowerShell as an administrator and run:
 
 ```powershell
 Enable-LocalUser -Name "Administrator"
 ```
-###2. Set or Confirm the Administrator Password
+##2. Set or Confirm the Administrator Password
 
 ```powershell
 net user Administrator "YourStrongPassword123"
 ```
-###3. When using Ansible with WinRM, ensure your inventory uses the Administrator account like so:
+##3. When using Ansible with WinRM, ensure your inventory uses the Administrator account like so:
 
 ```inventory.ini
 [windows]
