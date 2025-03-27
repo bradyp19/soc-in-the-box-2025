@@ -116,19 +116,19 @@ By default, this account may be disabled or restricted from remote login. These 
 
 ## Step-by-Step Instructions
 
-## 1. Ensure the Administrator Account is Enabled
+1. Ensure the Administrator Account is Enabled
 
 Open PowerShell as an administrator and run:
 
 ```powershell
 Enable-LocalUser -Name "Administrator"
 ```
-##2. Set or Confirm the Administrator Password
+2. Set or Confirm the Administrator Password
 
 ```powershell
 net user Administrator "YourStrongPassword123"
 ```
-##3. When using Ansible with WinRM, ensure your inventory uses the Administrator account like so:
+3. When using Ansible with WinRM, ensure your inventory uses the Administrator account like so:
 
 ```inventory.ini
 [windows]
