@@ -12,7 +12,7 @@ To manage a Windows machine using Ansible over WinRM, you must first enable and 
 
 ## Enable WinRM (Manual Setup via PowerShell)
 
-Run the following **PowerShell commands as Administrator** on the Windows host:
+Run the following **PowerShell commands as Administrator** on the Windows10-2019-Server host:
 
 ```powershell
 # Enable and start WinRM service
@@ -31,6 +31,31 @@ New-NetFirewallRule -Name "AllowWinRM" -DisplayName "Allow WinRM" -Enabled True 
 winrm quickconfig -q
 ```
 
+Run the following **PowerShell commands as Administrator** on the Windows11-2022-Enterprise host:
+
+```powershell
+# Get current network profile(s)
+Get-NetConnectionProfile
+
+# OPTIONAL: Set network category to Private (required for WinRM firewall exception to work)
+# Replace "Ethernet" with your actual interface name if it's different
+Set-NetConnectionProfile -InterfaceAlias "Ethernet" -NetworkCategory Private
+
+# Enable and configure WinRM service
+Set-Service -Name WinRM -StartupType Automatic
+Start-Service -Name WinRM
+
+# Enable Basic authentication and allow unencrypted traffic (required for Ansible with winrm transport=basic)
+winrm set winrm/config/service/auth '@{Basic="true"}'
+winrm set winrm/config/service '@{AllowUnencrypted="true"}'
+
+# Add firewall rule to allow inbound WinRM traffic on HTTP (port 5985)
+New-NetFirewallRule -Name "AllowWinRM" -DisplayName "Allow WinRM" -Enabled True `
+    -Direction Inbound -Protocol TCP -LocalPort 5985 -Action Allow
+
+# Ensure the WinRM listener is running
+winrm quickconfig -q
+```
 ---
 
 ## Verify WinRM is Working
