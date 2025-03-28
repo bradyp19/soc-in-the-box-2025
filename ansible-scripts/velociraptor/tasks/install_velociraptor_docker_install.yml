@@ -1,0 +1,52 @@
+---
+ - name: Install Velociraptor
+   hosts: dfirstation
+   become: true
+   vars:
+     ansible_user: debian
+     velociraptor_install_path: /home/{{ ansible_user }}/velociraptor-docker
+   tasks:
+ 
+   # ----------- System Preparation -----------
+     - name: Install CA Certificates (Debian-based systems)
+       ansible.builtin.apt:
+         name:
+           - ca-certificates
+         state: present
+       when: ansible_os_family == "Debian"
+ 
+     - name: Install Required Packages
+       ansible.builtin.apt:
+         name:
+           - git
+         state: present
+
+     - name: Upgrade Debian
+       ansible.builtin.apt:
+         upgrade: dist
+         update_cache: yes
+
+     - name: Check if a reboot is required.
+       ansible.builtin.stat:
+         path: /var/run/reboot-required
+         get_checksum: no
+       register: reboot_required_file
+ 
+     - name: Reboot the server (if required).
+       ansible.builtin.reboot:
+       when: reboot_required_file.stat.exists == true
+ 
+     - name: Download Velociraptor Binary From GitHub
+       ansible.builtin.git:
+         repo: https://github.com/weslambert/velociraptor-docker.git
+         dest: "{{ velociraptor_install_path }}"
+         clone: yes
+ 
+     - name: Run Velociraptor Docker Image
+       ansible.builtin.command:
+         chdir: "{{ velociraptor_install_path }}"
+         argv:
+           - docker
+           - compose
+           - up
+           - -d
