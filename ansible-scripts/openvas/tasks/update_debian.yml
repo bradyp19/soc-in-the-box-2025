@@ -1,0 +1,43 @@
+---
+- name: Update debian
+  hosts: all
+  become: true
+  tasks:
+# ----------- System Preparation -----------
+    - name: Install CA Certificates (Debian-based systems)
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install Required Packages
+      ansible.builtin.apt:
+        name:
+          - wget
+          - net-tools
+          - dnsutils
+          - binutils
+          - git
+          - curl
+          - redis-server
+          - python3-mysqldb
+          - python3-pip
+          - gnupg
+          - lsb-release
+        state: present
+
+    - name: Upgrade Debian
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: yes
+
+    - name: Check if a reboot is required.
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+        get_checksum: no
+      register: reboot_required_file
+
+    - name: Reboot the server (if required).
+      ansible.builtin.reboot:
+      when: reboot_required_file.stat.exists == true

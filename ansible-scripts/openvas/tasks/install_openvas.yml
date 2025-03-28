@@ -1,0 +1,35 @@
+- name: Deploy OpenVAS
+  hosts: openvas
+  become: true
+  vars:
+    greenbone_install_url: "https://greenbone.github.io/docs/latest/_static/docker-compose.yml"
+    greenbone_install_path: /tmp/
+    docker_compose_file_path: "/{{ greenbone_install_path }}/docker-compose.yml"
+  tasks:
+  # ------------ Install Greenbone Latest Docker Compose Image ------------
+
+    - name: Installing Greenbone (openvas) with get_url
+      ansible.builtin.get_url:
+        url: "{{ greenbone_install_url }}"
+        dest: "{{ greenbone_install_path }}"
+        
+    - name: Change Docker Compose File to Allow Port Forwarding
+      ansible.builtin.lineinfile:
+        path: "{{ docker_compose_file_path }}"
+        regexp: '^\s*- 127.0.0.1:9392:80'
+        line: '        - {{ ansible_default_ipv4.address }}:9392:80'
+        insertafter: '^ports:$'
+        state: present
+        backup: yes
+
+    - name: Pull image from Greenbone Community Project
+      community.docker.docker_compose_v2:
+        project_src: "{{ greenbone_install_path }}"
+        pull: always
+        state: present
+
+    - name: Build an image from the Greenbone Community Project
+      community.docker.docker_compose_v2:
+        project_src: "{{ greenbone_install_path }}"
+        build: always
+        state: present
