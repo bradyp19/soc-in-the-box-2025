@@ -1,48 +1,19 @@
 ---
 - name: Install Velociraptor
   hosts: dfirstation
-  become: true
+  become: yes
   vars:
     ansible_user: debian
     velociraptor_install_path: /usr/local/bin/velociraptor
     velociraptor_download_link: https://github.com/Velocidex/velociraptor/releases/download/v0.73/velociraptor-v0.73.4-linux-amd64
     velociraptor_output_file: velociraptor
     velociraptor_server_ip: 10.3.10.2
+    velociraptor_server_port: 8000
     velociraptor_admin_username: admin
     velociraptor_admin_password: password
     velociraptor_server_file_location: /etc/server.config.yaml
-    velociraptor_client_file_location: /tmp/client/config.yaml
+    velociraptor_client_file_location: /tmp/client.config.yaml
   tasks:
-
-  # ----------- System Preparation -----------
-    - name: Install CA Certificates (Debian-based systems)
-      ansible.builtin.apt:
-        name:
-          - ca-certificates
-        state: present
-      when: ansible_os_family == "Debian"
-
-    - name: Install Required Packages
-      ansible.builtin.apt:
-        name:
-          - wget
-        state: present
-
-    - name: Upgrade Debian
-      ansible.builtin.apt:
-        upgrade: dist
-        update_cache: yes
-
-    - name: Check if a reboot is required.
-      ansible.builtin.stat:
-        path: /var/run/reboot-required
-        get_checksum: no
-      register: reboot_required_file
-
-    - name: Reboot the server (if required).
-      ansible.builtin.reboot:
-      when: reboot_required_file.stat.exists == true
-
 # ----------- Velociraptor -----------
 
     - name: "Download Velociraptor Client"
@@ -55,7 +26,7 @@
 
 
     - name: Move Velociraptor binary to /usr/local/bin
-      ansible.builtin.command: mv /home/debian/velociraptor /usr/local/bin/velociraptor
+      ansible.builtin.command: mv /home/debian/velociraptor {{ velociraptor_install_path }}
       args:
         creates: "{{ velociraptor_install_path }}"
 
@@ -74,7 +45,7 @@
       ansible.builtin.lineinfile:
         path: "{{ velociraptor_server_file_location }}"
         regexp: '^\s*- https://localhost:8000/'
-        line: '  - https://{{ velociraptor_server_ip }}:8000/'
+        line: '  - https://{{ velociraptor_server_ip }}:{{ velociraptor_server_port }}/'
         backup: yes
 
 # ----------- Velociraptor Config Edits -----------
@@ -100,7 +71,7 @@
         line: '  hostname: {{ velociraptor_server_ip }}'
         backup: yes
 
-    - name: Create Admin user
+    - name: Create Admin user (Username=Admin)
       ansible.builtin.command:
         argv:
           - "sudo"
@@ -155,4 +126,4 @@
 
 # ----------- Velociraptor Create Client Configs -----------
     - name: Create Client Config File in /tmp
-      ansible.builtin.shell: sudo velociraptor --config {{ velociraptor_server_file_location }} config client > /tmp/client.config.yaml
+      ansible.builtin.shell: sudo velociraptor --config {{ velociraptor_server_file_location }} config client > {{ velociraptor_client_file_location }}
