@@ -25,6 +25,9 @@ ansible-playbook -i inventory.ini tasks/main.yml --ask-become
 ```
 
 # After playbook runs
+IP address is subject to change. Example listed below.
+
 Velociraptor GUI is located at 10.3.10.2:8889
+
 Default login information: admin:password
 - Automatically installs client on the kali machine.
