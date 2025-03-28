@@ -1,0 +1,10 @@
+- name: Enable WinRM on Windows Server
+  win_shell: |
+    winrm quickconfig -q
+    winrm set winrm/config/service/Auth '@{Basic="true"}'
+    winrm set winrm/config/service '@{AllowUnencrypted="true"}'
+    winrm set winrm/config/listener?Address=*+Transport=HTTP '@{Port="5985";Enabled="true"}'
+  register: winrm_setup
+  changed_when: "'updated' in winrm_setup.stdout"
+  become: yes
+  become_method: runas 

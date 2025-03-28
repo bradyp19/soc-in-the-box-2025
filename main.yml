@@ -1,0 +1,12 @@
+---
+- name: Configuring Splunk Search Workstation on Debian
+  hosts: debian
+  become: true
+  roles:
+    - splunk-search
+
+- name: Install and Configure Splunk Forwarder on Kali and Windows
+  hosts: kali
+  become: true
+  roles:
+    - splunk-forwarder
