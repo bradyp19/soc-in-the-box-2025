@@ -1,0 +1,13 @@
+---
+
+- name: Update Debian Server
+  ansible.builtin.import_playbook: update_debian.yml
+
+- name: Install Velociraptor Server and Generate Client Config
+  ansible.builtin.import_playbook: install_velociraptor.yml
+
+- name: Copy file to client
+  ansible.builtin.import_playbook: copying_files.yml
+
+- name: Install client
+  ansible.builtin.import_playbook: install_client.yml

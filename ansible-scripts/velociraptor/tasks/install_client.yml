@@ -1,0 +1,22 @@
+---
+- name: Install Velociraptor
+  hosts: kali
+  become: true
+  vars:
+    velociraptor_download_link: https://github.com/Velocidex/velociraptor/releases/download/v0.73/velociraptor-v0.73.4-linux-amd64
+  tasks:
+
+
+# ----------- Velociraptor -----------
+    - name: "Download Velociraptor Client"
+      ansible.builtin.get_url:
+        url: "{{ velociraptor_download_link }}"
+        dest: "/home/kali/velociraptor"
+        owner: root
+        group: root
+        mode: '0750'
+
+    - name: Install Client on Kali
+      ansible.builtin.shell: ./velociraptor --config /tmp/client.config.yaml client &
+      args:
+        chdir: /home/kali/
