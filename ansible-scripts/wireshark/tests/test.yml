@@ -1,0 +1,5 @@
+---
+- hosts: forensics_machine_server
+  become: true
+  roles:
+    - dfir-station
