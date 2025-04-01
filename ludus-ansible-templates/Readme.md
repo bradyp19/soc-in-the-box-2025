@@ -45,8 +45,7 @@ Set-NetConnectionProfile -InterfaceAlias "Ethernet" -NetworkCategory Private
 Set-Service -Name WinRM -StartupType Automatic
 Start-Service -Name WinRM
 
-# Enable Basic authentication and allow unencrypted traffic (required for Ansible with winrm transport=basic)
-winrm set winrm/config/service/auth '@{Basic="true"}'
+# Enable Basic authentication and allow unencrypted traffic (required for Ansible with winrm transport=ntlm)
 winrm set winrm/config/service '@{AllowUnencrypted="true"}'
 
 # Add firewall rule to allow inbound WinRM traffic on HTTP (port 5985)
