@@ -154,7 +154,7 @@ def format_log(log_type, log_message):
         "log_type": log_type,
         "host": random.choice(hosts),
         "severity": severity_map.get(log_type, "Info"),
-        "message": log_message
+        "message": log_message,
         "os": current_os  # Include the current operating system in the log
 
     }
