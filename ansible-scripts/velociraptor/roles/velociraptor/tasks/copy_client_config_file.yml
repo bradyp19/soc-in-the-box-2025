@@ -1,0 +1,15 @@
+---
+- name: Fetch from Velociraptor Server to Master
+  fetch:
+    src: /tmp/client.config.yaml
+    dest: /tmp/
+    flat: yes
+  run_once: yes
+  when: "fetch_group is defined and inventory_hostname in groups[fetch_group]"
+
+- name: Copy the File from Master to Client
+  copy:
+    src: /tmp/client.config.yaml
+    dest: /tmp/client.config.yaml
+  loop: "{{ copy_group | map('extract', groups) | list | flatten | unique }}" # Defined in defaults/main.yml
+  delegate_to: "{{ item }}"

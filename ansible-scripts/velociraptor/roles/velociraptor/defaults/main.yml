@@ -1,0 +1,16 @@
+# roles/velociraptor/defaults/main.yml
+---
+  ansible_server_user: debian
+  velociraptor_install_path: /usr/local/bin/velociraptor
+  velociraptor_download_link: https://github.com/Velocidex/velociraptor/releases/download/v0.73/velociraptor-v0.73.4-linux-amd64
+  velociraptor_output_file: velociraptor
+  velociraptor_server_ip: 10.3.10.3 # change this to your server ip
+  velociraptor_server_port: 8000
+  velociraptor_admin_username: admin
+  velociraptor_admin_password: password
+  velociraptor_server_file_location: /etc/server.config.yaml
+  velociraptor_client_file_location: /tmp/client.config.yaml
+
+
+  fetch_group: "forensics_server"
+  copy_group: ["kali", "vulhub_server"]

@@ -1,0 +1,18 @@
+# roles/velociraptor/tasks/install_client.yml
+---
+- name: Load defaults/main.yml vars
+  include_vars:
+    file: "defaults/main.yml"
+
+- name: Download Velociraptor Client
+  ansible.builtin.get_url:
+    url: "{{ velociraptor_download_link }}"
+    dest: "/tmp/velociraptor"
+    owner: root
+    group: root
+    mode: '0700'
+
+- name: Install Client
+  ansible.builtin.shell: "./velociraptor --config {{ velociraptor_client_file_location }} client &"
+  args:
+    chdir: /tmp/

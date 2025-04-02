@@ -1,0 +1,46 @@
+---
+
+- name: Update Debian Servers
+  hosts: forensics_server:vulhub_server
+  become: true
+  roles:
+    - velociraptor
+  tasks:
+    - name: Install Velociraptor Server on Forensics Server
+      include_role:
+          name: velociraptor
+          tasks_from: update_debian.yml
+
+- name: Install Velociraptor Server
+  hosts: forensics_server
+  become: true
+  roles:
+    - velociraptor
+  tasks:
+    - name: Install Velociraptor Server on Forensics Server
+      include_role:
+          name: velociraptor
+          tasks_from: install_velociraptor_server.yml
+
+
+- name: Copy Client Config to All Clients
+  hosts: forensics_server
+  become: true
+  roles:
+    - velociraptor
+  tasks:
+    - name: Install Velociraptor Server on Forensics Server
+      include_role:
+          name: velociraptor
+          tasks_from: copy_client_config_file.yml
+
+- name: Install Velociraptor Client
+  hosts: kali:vulhub_server
+  become: true
+  roles:
+    - velociraptor
+  tasks:
+    - name: Install Velociraptor Server on Forensics Server
+      include_role:
+          name: velociraptor
+          tasks_from: install_clients.yml

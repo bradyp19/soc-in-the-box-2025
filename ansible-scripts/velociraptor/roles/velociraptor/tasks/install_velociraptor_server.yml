@@ -1,0 +1,130 @@
+---
+- name: "Test first_found lookup"
+  debug:
+    msg: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - main.yml
+      paths:
+        - '../defaults'
+
+- name: Load defaults/main.yml vars.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - main.yml
+      paths:
+        - 'defaults'
+
+# ----------- Velociraptor -----------
+- name: "Download Velociraptor Client"
+  ansible.builtin.get_url:
+    url: "{{ velociraptor_download_link }}"
+    dest: "/home/debian/velociraptor"
+    owner: root
+    group: root
+    mode: '0750'
+
+
+- name: Move Velociraptor binary to /usr/local/bin
+  ansible.builtin.command: mv /home/debian/velociraptor {{ velociraptor_install_path }}
+  args:
+    creates: "{{ velociraptor_install_path }}"
+
+- name: Create Executable File For Velociraptor
+  ansible.builtin.file:
+    path: "{{ velociraptor_install_path }}"
+    owner: "root"
+    group: "root"
+    mode: 0744
+
+- name: Generate Config File for Velociraptor
+  ansible.builtin.shell:
+    cmd: sudo {{ velociraptor_output_file }} config generate > {{ velociraptor_server_file_location }}
+
+# ----------- Velociraptor Config Edits -----------
+- name: Update IP in Velociraptor config file
+  ansible.builtin.lineinfile:
+    path: "{{ velociraptor_server_file_location }}"
+    regexp: '^\s*- https://localhost:8000/'
+    line: '  - https://{{ velociraptor_server_ip }}:{{ velociraptor_server_port }}/'
+    backup: yes
+
+- name: Remove Old Bind Address Under GUI
+  ansible.builtin.replace:
+    path: "{{ velociraptor_server_file_location }}"
+    regexp: '(^GUI:\n(?:\s{2}.*\n)*)\s*bind_address:\s*127\.0\.0\.1\n'
+    replace: '\1'
+    backup: yes
+
+- name: Insert bind_address under GUI
+  ansible.builtin.lineinfile:
+    path: "{{ velociraptor_server_file_location }}"
+    insertafter: '^GUI:$'
+    line: '  bind_address: {{ velociraptor_server_ip }}'
+    backup: yes
+
+- name: Changes hostname from localhost to 10.3.10.2
+  ansible.builtin.lineinfile:
+    path: "{{ velociraptor_server_file_location }}"
+    regexp: 'hostname+: localhost'
+    line: '  hostname: {{ velociraptor_server_ip }}'
+    backup: yes
+
+- name: Create Admin user (Username=Admin)
+  ansible.builtin.command:
+    argv:
+      - "sudo"
+      - "{{ velociraptor_output_file }}"
+      - "--config"
+      - "{{ velociraptor_server_file_location }}"
+      - "user"
+      - "add"
+      - "{{ velociraptor_admin_username }}"
+      - "{{ velociraptor_admin_password }}"
+      - "--role"
+      - "administrator"
+
+# ----------- Velociraptor Service -----------
+# The -v is not required. Used for debugging issues with server
+# Could add this to a template file
+- name: Create Velociraptor systemd service file
+  copy:
+    dest: /etc/systemd/system/velociraptor.service
+    content: |
+      [Unit]
+      Description=Velociraptor linux amd64
+      After=syslog.target network.target
+
+      [Service]
+      Type=simple
+      Restart=always
+      RestartSec=120
+      LimitNOFILE=20000
+      Environment=LANG=en_US.UTF-8
+      ExecStart=/usr/local/bin/velociraptor --config /etc/server.config.yaml frontend -v
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable and Start Velociraptor Service Starts on Boot
+  systemd:
+    name: velociraptor
+    enabled: yes
+    state: started
+    daemon_reload: true
+
+# Restarting allows for regex changes to apply
+- name: Restart Velociraptor Service (Required)
+  systemd:
+    name: velociraptor
+    state: restarted
+
+# ----------- Velociraptor Create Client Configs -----------
+- name: Create Client Config File in /tmp
+  ansible.builtin.shell: sudo velociraptor --config {{ velociraptor_server_file_location }} config client > {{ velociraptor_client_file_location }}
