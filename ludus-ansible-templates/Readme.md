@@ -47,6 +47,7 @@ Start-Service -Name WinRM
 
 # Enable Basic authentication and allow unencrypted traffic (required for Ansible with winrm transport=ntlm)
 winrm set winrm/config/service '@{AllowUnencrypted="true"}'
+winrm set winrm/config/service/auth '@{Basic="true"}'
 
 # Add firewall rule to allow inbound WinRM traffic on HTTP (port 5985)
 New-NetFirewallRule -Name "AllowWinRM" -DisplayName "Allow WinRM" -Enabled True `
