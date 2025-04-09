@@ -1,0 +1,14 @@
+admin_password: "Str0ngP@ssw0rd!"
+splunk_forwarder_version: "9.4.1"
+splunk_forwarder_package: "splunkforwarder-9.4.1-e3bdab203ac8-windows-x64.msi"
+splunk_forwarder_download_url: "https://download.splunk.com/products/universalforwarder/releases/9.4.1/windows/splunkforwarder-9.4.1-e3bdab203ac8-windows-x64.msi"
+splunk_forwarder_install_dir: "C:\\Program Files\\SplunkUniversalForwarder"
+splunk_forwarder_user: "Administrator"
+splunk_forwarder_group: "Administrators"
+splunk_user: "admin"
+splunk_password: "password"
+splunk_search_head: "10.7.10.3"
+splunk_forwarder_ports:
+  - 8089
+  - 9997
+  - 514
