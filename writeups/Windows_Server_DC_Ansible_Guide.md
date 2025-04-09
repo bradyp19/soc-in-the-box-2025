@@ -2,25 +2,6 @@
 
 This project outlines how to configure a **Windows Server 2019** virtual machine as an **Active Directory Domain Controller** using **Ansible** on the **Ludus platform**. It also covers **WinRM setup** for both Windows Server 2019 and Windows 11 2022 Enterprise to enable Ansible remote management.
 
----
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Prerequisites](#prerequisites)
-  - [Platform Requirements](#platform-requirements)
-  - [User Requirements](#user-requirements)
-- [Ansible Project Structure](#ansible-project-structure)
-- [Inventory Configuration](#inventory-configuration)
-- [Variable Definitions](#variable-definitions)
-- [WinRM Setup](#winrm-setup)
-- [Running the Playbook](#running-the-playbook)
-- [Playbook Phases](#playbook-phases)
-- [Troubleshooting](#troubleshooting)
-- [Important Notes](#important-notes)
-
----
-
 ## Overview
 
 Automate your Windows Server 2019 Domain Controller configuration using Ansible. This guide streamlines domain setup, post-installation tasks, and includes OpenSSH and registry configuration.
