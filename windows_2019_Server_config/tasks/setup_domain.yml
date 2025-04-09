@@ -1,0 +1,21 @@
+- name: Create Active Directory Domain
+  microsoft.ad.domain:
+    create_dns_delegation: false
+    dns_domain_name: "{{ netbios_name }}.{{ fqdn_tail }}"
+    domain_netbios_name: "{{ netbios_name }}"
+    domain_mode: "{{ domain_functional_level }}"
+    forest_mode: "{{ forest_functional_level }}"
+    safe_mode_password: "{{ domain_admin_password }}"
+    install_dns: true
+  register: domain_creation
+  failed_when:
+    - domain_creation.failed
+    - "domain_creation.msg is defined and \"The specified argument 'CreateDNSDelegation' was not recognized\" not in domain_creation"
+  become: yes
+  become_method: runas
+
+- name: Reboot after domain configuration
+  ansible.windows.win_reboot:
+    msg: "Rebooting to complete Active Directory Domain setup."
+    pre_reboot_delay: 10
+    reboot_timeout: 600
