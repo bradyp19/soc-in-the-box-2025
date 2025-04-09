@@ -96,7 +96,6 @@ splunk_forwarder_ports:
   - 514
 
 ## Install Splunk forwarder 
-### Install Splunk Forwarder
 
 ```yaml
 win_command: >
