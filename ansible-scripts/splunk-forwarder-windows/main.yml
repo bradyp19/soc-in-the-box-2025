@@ -1,0 +1,15 @@
+- name: Install Splunk Forwarder
+  hosts: windows_server
+  gather_facts: false
+  roles:
+    - role: splunk-forwarder
+      vars:
+        splunk_search_head: "10.7.10.3"
+
+- name: Install Splunk Forwarder
+  hosts: windows
+  gather_facts: false
+  roles:
+    - role: splunk-forwarder
+      vars:
+        splunk_search_head: "10.7.10.3"
