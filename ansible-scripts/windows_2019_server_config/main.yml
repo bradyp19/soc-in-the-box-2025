@@ -1,0 +1,33 @@
+- name: Phase 1 - Setup Domain
+  hosts: windows
+  become: yes
+  become_method: runas
+  become_user: Administrator
+
+  vars_files:
+    - vars/main.yml
+
+  tasks:
+    - name: Enable WinRM (optional)
+      include_tasks: tasks/enable_winrm.yml
+
+    - name: Configure Active Directory Domain
+      include_tasks: tasks/setup_domain.yml
+
+- name: Phase 2 - Wait for reboot and post-config
+  hosts: windows
+  become: yes
+  become_method: runas
+  become_user: Administrator
+
+  vars_files:
+    - vars/main.yml
+
+  tasks:
+    - name: Wait for WinRM to come back online
+      wait_for_connection:
+        delay: 30
+        timeout: 600
+
+    - name: Post Domain Configuration (Password, AutoLogon, SSH)
+      include_tasks: tasks/post_config.yml
