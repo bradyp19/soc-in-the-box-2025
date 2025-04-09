@@ -1,0 +1,7 @@
+- name: Enable PowerShell Remoting (WinRM)
+  win_shell: |
+    Enable-PSRemoting -Force
+    Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $true
+    Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
+    netsh advfirewall firewall add rule name="Allow WinRM" dir=in action=allow protocol=TCP localport=5985
+  ignore_errors: true
