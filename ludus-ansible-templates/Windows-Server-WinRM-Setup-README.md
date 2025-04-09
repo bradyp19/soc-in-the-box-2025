@@ -25,7 +25,7 @@ winrm set winrm/config/service '@{AllowUnencrypted="true"}'
 
 # Create firewall rule to allow WinRM on port 5985
 New-NetFirewallRule -Name "AllowWinRM" -DisplayName "Allow WinRM" -Enabled True 
-    -Direction Inbound -Protocol TCP -LocalPort 5985 -Action Allow
+-Direction Inbound -Protocol TCP -LocalPort 5985 -Action Allow
 
 # Ensure the WinRM listener is running
 winrm quickconfig -q
