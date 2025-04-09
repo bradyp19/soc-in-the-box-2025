@@ -48,27 +48,31 @@ ansible_winrm_server_cert_validation=ignore
 ansible_port=5985
 ansible_become_user=Administrator
 ansible_become_method=runas
+```
 ---
 
 ##vars/main.yml
+```
 netbios_name: "DC"
 fqdn_tail: "home.arpa"
 domain_admin_password: "Str0ngP@ssw0rd!"  # Change this
 domain_functional_level: "WinThreshold"
 forest_functional_level: "WinThreshold"
-
+```
 ---
 
 ##WinRM Setup
 #Manual Setup for Windows Server 2019
+```
 Set-Service -Name WinRM -StartupType Automatic
 Start-Service -Name WinRM
 winrm set winrm/config/service/auth '@{Basic="true"}'
 winrm set winrm/config/service '@{AllowUnencrypted="true"}'
 New-NetFirewallRule -Name "AllowWinRM" -DisplayName "Allow WinRM" -Enabled True -Direction Inbound -Protocol TCP -LocalPort 5985 -Action Allow
 winrm quickconfig -q
-
+```
 #Manual Setup for Windows 11 2022 Enterprise
+```
 Set-NetConnectionProfile -InterfaceAlias "Ethernet" -NetworkCategory Private
 Set-Service -Name WinRM -StartupType Automatic
 Start-Service -Name WinRM
@@ -76,7 +80,10 @@ winrm set winrm/config/service '@{AllowUnencrypted="true"}'
 winrm set winrm/config/service/auth '@{Basic="true"}'
 New-NetFirewallRule -Name "AllowWinRM" -DisplayName "Allow WinRM" -Enabled True -Direction Inbound -Protocol TCP -LocalPort 5985 -Action Allow
 winrm quickconfig -q
+```
 ---
 ##unning the Playbook
+```
 cd ~/windows_2019_Server_config/
 ansible-playbook -i inventory.ini main.yml
+```
