@@ -1,7 +1,8 @@
 ---
-- hosts: vulhub_hosts
+- hosts: vulhub_server
   become: true
   roles:
+    - geerlingguy.docker
     - badsectorlabs.ludus_vulhub
   vars:
     vulhub_envs:
