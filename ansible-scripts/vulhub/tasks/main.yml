@@ -1,66 +1,59 @@
 ---
-- name: Deploy Vulhub
-  hosts: vulhub_hosts
-  become: true
-  vars:
-    vulhub_git_url: https://github.com/vulhub/vulhub
-    vulhub_install_path: /opt/vulhub
-    vulhub_branch: master
-    rce_docker_compose_location: "{{ vulhub_install_path }}/docker/unauthorized-rce"
-  tasks:
+- name: Update APT cache
+  ansible.builtin.apt:
+    update_cache: true
+  when: ansible_os_family == "Debian"
 
-    - name: Update APT cache
-      ansible.builtin.apt:
-        update_cache: true
-      when: ansible_os_family == "Debian"
+- name: Install git if required
+  ansible.builtin.package:
+    name: git
+    state: present
 
-    - name: Install git if required
-      ansible.builtin.package:
-        name: git
-        state: present
+- name: Install CA Certificates (Debian-based systems)
+  ansible.builtin.apt:
+    name: ca-certificates
+    state: present
+  when: ansible_os_family == "Debian"
 
-    - name: Install CA Certificates (Debian-based systems)
-      ansible.builtin.apt:
-        name: ca-certificates
-        state: present
-      when: ansible_os_family == "Debian"
+- name: Install required dependencies
+  ansible.builtin.package:
+    name:
+      - wget
+      - curl
+      - tar
+      - ufw
+      - python3-passlib
+    state: present
 
-    - name: Install required dependencies
-      ansible.builtin.package:
-        name:
-          - wget
-          - curl
-          - tar
-          - ufw
-          - python3-passlib
-        state: present
+- name: Enable UFW (Firewall)
+  community.general.ufw:
+    state: enabled
 
-    - name: Enable UFW (Firewall)
-      community.general.ufw:
-        state: enabled
+- name: Allow SSH through firewall
+  community.general.ufw:
+    rule: allow
+    port: "22"
+    proto: tcp
 
-    - name: Allow SSH through firewall
-      community.general.ufw:
-        rule: allow
-        port: "22"
-        proto: tcp
+- name: Get the source code
+  ansible.builtin.git:
+    repo: "{{ vulhub_git_url }}"
+    dest: "{{ vulhub_install_path }}"
+    version: "{{ vulhub_branch }}"
+    single_branch: true
 
-    - name: Get the source code
-      ansible.builtin.git:
-        repo: "{{ vulhub_git_url }}"
-        dest: "{{ vulhub_install_path }}"
-        version: "{{ vulhub_branch }}"
-        single_branch: true
+- name: Stop any existing vulhub docker containers
+  ansible.builtin.shell: |
+    docker ps --filter "label=com.docker.compose.project.working_dir" --format {% raw %}"{{.ID}} {{.Labels}}"{% endraw %} | \
+     grep 'com.docker.compose.project.config_files={{ vulhub_install_path }}' | cut -d ' ' -f 1 | xargs -r docker stop
 
-    - name: Stop any existing vulhub docker containers
-      ansible.builtin.shell: 
-        cmd: |
-          docker compose down
-        chdir: "{{ rce_docker_compose_location }}"
-
-    - name: Start the vulhub environments (shell)
-      ansible.builtin.shell:
-        cmd: |
-          docker compose build
-          docker compose up -d
-        chdir: "{{ rce_docker_compose_location }}"
+# community.docker.docker_compose has too many dependencies
+- name: Start the vulhub environments (shell)
+  ansible.builtin.shell:
+    cmd: |
+      docker compose build
+      docker compose up -d
+    chdir: "{{ vulhub_install_path }}/{{ vulhub_env }}"
+  loop: "{{ vulhub_envs }}"
+  loop_control:
+    loop_var: vulhub_env
