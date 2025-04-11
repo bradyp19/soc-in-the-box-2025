@@ -1,4 +1,4 @@
-[logo]: https://github.com/bradyp19/soc-in-the-box-2025/hero.png "Logo Title Text 2"
+![SOC-in-a-Box](hero.png)
 
 # SOC-in-a-Box
 
