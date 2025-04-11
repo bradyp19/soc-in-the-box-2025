@@ -1,3 +1,5 @@
+[logo]: https://github.com/bradyp19/soc-in-the-box-2025/hero.png "Logo Title Text 2"
+
 # SOC-in-a-Box
 
 The SOC-in-a-Box is a pre-configured security lab, making it easier and faster to deploy. It integrates monitoring, detection, logging, and incident response tools into a cohesive package. The goal is to provide all the core functionalities of a traditional Security Operations Center (SOC) in a streamlined and accessible method.
