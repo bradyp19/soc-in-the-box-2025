@@ -1,18 +1,18 @@
 ---
-# ✅ Update APT cache to ensure package lists are up-to-date
+# Update APT cache to ensure package lists are up-to-date
 - name: Update APT cache
   ansible.builtin.apt:
     update_cache: true
   when: ansible_os_family == "Debian"
 
-# ✅ Install CA Certificates to handle SSL/TLS connections
+# Install CA Certificates to handle SSL/TLS connections
 - name: Install CA Certificates (Debian-based systems)
   ansible.builtin.apt:
     name: ca-certificates
     state: present
   when: ansible_os_family == "Debian"
 
-# ✅ Install required dependencies like wget, curl, firewall (ufw), and Python packages
+# Install required dependencies like wget, curl, firewall (ufw), and Python packages
 - name: Install required dependencies
   ansible.builtin.package:
     name:
@@ -26,19 +26,19 @@
       - python3-setuptools # Python package management utility
     state: present
 
-# ✅ Enable the UFW firewall to ensure security settings are applied
+# Enable the UFW firewall to ensure security settings are applied
 - name: Enable UFW (Firewall)
   community.general.ufw:
     state: enabled
 
-# ✅ Allow SSH connections through the firewall to prevent lockout
+# Allow SSH connections through the firewall to prevent lockout
 - name: Allow SSH through firewall
   community.general.ufw:
     rule: allow
     port: "22"
     proto: tcp
 
-# ✅ Open necessary firewall ports for Splunk services
+# Open necessary firewall ports for Splunk services
 - name: Open firewall ports for Splunk
   community.general.ufw:
     rule: allow
@@ -50,21 +50,21 @@
     - 9997 # Splunk Forwarding Port
     - 514 # Syslog (optional)
 
-# ✅ Download the Splunk package from the official source
+# Download the Splunk package from the official source
 - name: Download Splunk
   ansible.builtin.get_url:
     url: "{{ splunk_download_url }}"
     dest: "/tmp/{{ splunk_package }}"
     mode: "0644"
 
-# ✅ Install Splunk package using dpkg (Debian-based systems)
+# Install Splunk package using dpkg (Debian-based systems)
 - name: Install Splunk
   ansible.builtin.command:
     cmd: "dpkg -i /tmp/{{ splunk_package }}"
   args:
     creates: "{{ splunk_install_dir }}/bin/splunk"
 
-# ✅ Ensure the Splunk user and group exist for proper permissions
+# Ensure the Splunk user and group exist for proper permissions
 - name: Ensure Splunk user and group exist
   ansible.builtin.user:
     name: "{{ splunk_user }}"
@@ -73,7 +73,7 @@
     shell: /bin/bash
     createhome: false
 
-# ✅ Change ownership of the Splunk directory to the Splunk user
+# Change ownership of the Splunk directory to the Splunk user
 - name: Change ownership of Splunk directory
   ansible.builtin.file:
     path: "{{ splunk_install_dir }}"
@@ -81,7 +81,7 @@
     group: "{{ splunk_group }}"
     recurse: true
 
-# ✅ Accept Splunk License and start without upgrade prompt
+# Accept Splunk License and start without upgrade prompt
 - name: Accept Splunk License, Start Without Upgrade Prompt
   ansible.builtin.expect:
     command: "/opt/splunk/bin/splunk start --accept-license --no-prompt"
@@ -90,7 +90,7 @@
   become: true
   changed_when: false
 
-# ✅ Ensure user-seed.conf exists before starting Splunk (for admin login setup)
+# Ensure user-seed.conf exists before starting Splunk (for admin login setup)
 - name: Ensure Splunk user-seed.conf is created
   ansible.builtin.copy:
     dest: "{{ splunk_install_dir }}/etc/system/local/user-seed.conf"
@@ -104,7 +104,7 @@
   become: true
   register: user_seed_file
 
-# ✅ Restart Splunk after setting user-seed.conf to apply credentials
+# Restart Splunk after setting user-seed.conf to apply credentials
 - name: Restart Splunk after setting user-seed.conf
   ansible.builtin.command:
     cmd: "/opt/splunk/bin/splunk restart"
@@ -112,7 +112,7 @@
   changed_when: false
   when: user_seed_file.changed
 
-# ✅ Wait for Splunk Web UI to start before proceeding
+# Wait for Splunk Web UI to start before proceeding
 - name: Wait for Splunk web interface to start
   ansible.builtin.wait_for:
     port: 8000
@@ -120,7 +120,7 @@
     timeout: 60
   when: user_seed_file.changed
 
-# ✅ Ensure authentication before enabling listening port
+# Ensure authentication before enabling listening port
 - name: Ensure Splunk login works before enabling listening port
   ansible.builtin.expect:
     command: "/opt/splunk/bin/splunk login"
@@ -131,7 +131,7 @@
   register: splunk_login_result
   changed_when: false
 
-# ✅ Enable Splunk to listen on port 9997 for incoming forwarded logs
+# Enable Splunk to listen on port 9997 for incoming forwarded logs
 - name: Enable Splunk to listen on port 9997 with authentication
   ansible.builtin.expect:
     command: "/opt/splunk/bin/splunk enable listen 9997"
@@ -142,20 +142,20 @@
   register: splunk_enable_result
   changed_when: "'Listening for forwarded data on port 9997' in splunk_enable_result.stdout"
 
-# ✅ Restart Splunk after configuration changes
+# Restart Splunk after configuration changes
 - name: Restart Splunk after configuration
   ansible.builtin.command:
     cmd: "/opt/splunk/bin/splunk restart"
   become: true
   changed_when: false
 
-# ✅ Cleanup the downloaded Splunk package to free disk space
+# Cleanup the downloaded Splunk package to free disk space
 - name: Cleanup downloaded package
   ansible.builtin.file:
     path: "/tmp/{{ splunk_package }}"
     state: absent
 
-# ✅ Print Splunk Web Access URL for quick access
+# Print Splunk Web Access URL for quick access
 - name: Print Splunk UI Access URL
   ansible.builtin.debug:
     msg: "✅ Splunk installed! Access it via: http://{{ ansible_default_ipv4.address }}:8000 (User: admin)"
