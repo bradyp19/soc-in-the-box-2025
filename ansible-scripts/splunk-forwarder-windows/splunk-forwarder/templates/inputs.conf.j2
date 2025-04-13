@@ -1,0 +1,27 @@
+[default]
+host = windows 
+
+[WinEventLog://Application]
+disabled = 0
+
+[WinEventLog://Security]
+disabled = 0
+
+[WinEventLog://System]
+disabled = 0
+
+[monitor://C:\ProgramData\Microsoft\Windows Defender\Support\]
+sourcetype = defender_log
+index = security
+
+[monitor://C:\Users\*\Documents\logs\]
+sourcetype = user_logs
+index = main
+
+[monitor://C:\Users\*\Documents\PowerShell_transcripts\]
+sourcetype = powershell
+index = security
+
+[monitor://C:\ProgramData\Microsoft\Windows\WER\ReportQueue\]
+sourcetype = crash_dumps
+index = os_logs
