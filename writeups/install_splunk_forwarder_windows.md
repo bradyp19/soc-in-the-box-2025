@@ -134,3 +134,9 @@ clientName = {{ inventory_hostname }}
 
 [target-broker:deploymentServer]
 targetUri = {{ splunk_deployment_server }}:8089
+
+## Run the playbook
+```bash
+ansible-playbook -i inventory.ini main.yml --ask-become-pass
+# Ask-become-pass:kali
+```
