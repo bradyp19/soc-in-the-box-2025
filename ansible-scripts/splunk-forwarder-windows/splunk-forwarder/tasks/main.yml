@@ -1,5 +1,5 @@
 ---
-# 0. Enable Administrator account and set password
+# Enable Administrator account and set password
 - name: Enable the built-in Administrator account
   win_user:
     name: Administrator
@@ -81,13 +81,20 @@
     src: outputs.conf.j2
     dest: "{{ splunk_forwarder_install_dir }}\\etc\\system\\local\\outputs.conf"
 
-# 8. Add deployment.conf
+# 8. Deploy inputs.conf
+- name: Deploy inputs.conf (Enable Windows Event Logs + File monitoring)
+  win_template:
+    src: inputs.conf.j2
+    dest: "{{ splunk_forwarder_install_dir }}\\etc\\system\\local\\inputs.conf"
+  notify: Restart Splunk Forwarder
+
+# 9. Add deployment.conf
 - name: Deploy deploymentclient.conf
   win_template:
     src: deploymentclient.conf.j2
     dest: "{{ splunk_forwarder_install_dir }}\\etc\\system\\local\\deploymentclient.conf"
 
-# 9. Start and enable the service
+# 10. Start and enable the service
 - name: Start and enable Splunk Forwarder
   win_service:
     name: SplunkForwarder
