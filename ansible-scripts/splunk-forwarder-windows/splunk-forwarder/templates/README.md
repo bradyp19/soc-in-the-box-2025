@@ -8,7 +8,7 @@ Once deployed, it enables Splunk to ingest logs from specific sources and displa
 
 ---
 
-## ⚙️ How It Works
+## How It Works
 
 - **Monitors specific log files** on the system (e.g., `/home/user/log-generator.log`)
 - **Assigns a custom `sourcetype`** so Splunk can properly parse and classify the data
