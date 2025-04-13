@@ -116,7 +116,7 @@ become_user: Administrator
 
 #### File: `templates/outputs.conf.j2`
 
-```conf
+# conf file
 [tcpout]
 defaultGroup = default-autolb-group
 
@@ -134,6 +134,8 @@ clientName = {{ inventory_hostname }}
 
 [target-broker:deploymentServer]
 targetUri = {{ splunk_deployment_server }}:8089
+
+
 ```
 ## Run the playbook
 ```
