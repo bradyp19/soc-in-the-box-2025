@@ -136,6 +136,6 @@ clientName = {{ inventory_hostname }}
 targetUri = {{ splunk_deployment_server }}:8089
 
 ## Run the playbook
-```bash
+```
 ansible-playbook -i inventory.ini main.yml 
 ```
