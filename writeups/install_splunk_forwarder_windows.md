@@ -149,10 +149,7 @@ targetUri = {{ splunk_deployment_server }}:8089
 ```
 
 This setup enables automated Splunk Universal Forwarder deployment and log forwarding configuration across multiple Windows machines using Ansible.
-```
 
-
-```
 ## Run the playbook
 ```
 ansible-playbook -i inventory.ini main.yml 
