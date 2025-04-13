@@ -92,6 +92,15 @@
     mode: "0644"
   notify: Restart Splunk Forwarder
 
+- name: Deploy inputs.conf (Enable Linux log monitoring)
+  ansible.builtin.template:
+    src: "templates/inputs.conf.j2"
+    dest: "{{ splunk_forwarder_install_dir }}/etc/system/local/inputs.conf"
+    owner: "splunk"
+    group: "splunk"
+    mode: "0644"
+  notify: Restart Splunk Forwarde
+
 - name: Stop Splunk Forwarder before enabling boot-start (if running)
   ansible.builtin.command:
     cmd: "{{ splunk_forwarder_install_dir }}/bin/splunk stop"
