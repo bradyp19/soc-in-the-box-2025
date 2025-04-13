@@ -18,5 +18,5 @@ For example, if you're generating logs using a script on your Windows Server and
 ```ini
 [monitor://C:\logs\log-generator.log]
 disabled = false
-index = windows_custom
+index = main
 sourcetype = fake_loggen_json
