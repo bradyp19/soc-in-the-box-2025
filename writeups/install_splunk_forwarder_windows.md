@@ -34,6 +34,13 @@ The playbook sets up the Splunk Universal Forwarder, configures deployment and o
 
 **File**: `inventory.ini`
 
+```content
+# Splunk Forwarder Deployment for Windows (Ansible-Based)
+
+This README provides a reference for deploying and configuring the Splunk Universal Forwarder on Windows machines using Ansible. It includes inventory definitions, role variables, and key configuration templates.
+
+## Inventory Example: `inventory.ini`
+
 ```ini
 [windows]
 10.4.10.51
@@ -56,11 +63,12 @@ ansible_connection=winrm
 ansible_winrm_transport=basic
 ansible_winrm_server_cert_validation=ignore
 ansible_port=5985
+```
 
-## Ansible Playbook Example: main.yml
+## Ansible Playbook Example: `main.yml`
 
 ```yaml
-- name: Install Splunk Forwarder
+- name: Install Splunk Forwarder on Windows Server
   hosts: windows_server
   gather_facts: false
   roles:
@@ -68,16 +76,16 @@ ansible_port=5985
       vars:
         splunk_search_head: "10.4.10.3"
 
-- name: Install Splunk Forwarder in enterprise
+- name: Install Splunk Forwarder on Windows Enterprise
   hosts: windows
   gather_facts: false
   roles:
     - role: splunk-forwader
       vars:
         splunk_search_head: "10.4.10.3"
-## Role Variables
+```
 
-**File**: `defaults/main.yml`
+## Role Variables: `defaults/main.yml`
 
 ```yaml
 admin_password: "Str0ngP@ssw0rd!"
@@ -94,8 +102,9 @@ splunk_forwarder_ports:
   - 8089
   - 9997
   - 514
+```
 
-## Install Splunk forwarder 
+## Install Splunk Forwarder Task
 
 ```yaml
 win_command: >
@@ -111,12 +120,13 @@ register: splunk_install
 become: yes
 become_method: runas
 become_user: Administrator
+```
 
-### 7. Deploy Configuration Files
+## Deploy Configuration Files
 
-#### File: `templates/outputs.conf.j2`
+### Template: `templates/outputs.conf.j2`
 
-# conf file
+```conf
 [tcpout]
 defaultGroup = default-autolb-group
 
@@ -126,14 +136,20 @@ autoLB = true
 useACK = true
 
 [tcpout-server://{{ splunk_search_head }}:9997]
+```
 
-### File: templates/deploymentclient.conf.j2
+### Template: `templates/deploymentclient.conf.j2`
 
+```conf
 [deployment-client]
 clientName = {{ inventory_hostname }}
 
 [target-broker:deploymentServer]
 targetUri = {{ splunk_deployment_server }}:8089
+```
+
+This setup enables automated Splunk Universal Forwarder deployment and log forwarding configuration across multiple Windows machines using Ansible.
+```
 
 
 ```
