@@ -1,0 +1,17 @@
+[default]
+host = {{ inventory_hostname }}
+
+[monitor:///var/log/syslog]
+disabled = false
+index = linux_syslog
+sourcetype = syslog
+
+[monitor:///var/log/auth.log]
+disabled = false
+index = linux_auth
+sourcetype = linux_secure
+
+[monitor:///var/log/custom/*.log]
+disabled = false
+index = linux_custom
+sourcetype = custom_log
